@@ -186,3 +186,13 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+.v-data-table {
+  div {
+    table {
+      width: auto;
+    }
+  }
+}
+</style>
