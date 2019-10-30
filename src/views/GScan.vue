@@ -57,6 +57,13 @@
                   >
                     mdi-table-edit
                   </v-icon>
+                  <v-icon
+                      small
+                      class="mr-2"
+                      @click="$router.push({ path: `/dot/${item.name}` })"
+                  >
+                    mdi-dots-horizontal-circle-outline
+                  </v-icon>
                 </td>
               </tr>
             </template>

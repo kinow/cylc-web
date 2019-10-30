@@ -30,6 +30,14 @@ export default [
     }
   },
   {
+    path: '/dot/:name',
+    view: 'Dot',
+    meta: {
+      layout: 'default'
+    },
+    props: true
+  },
+  {
     path: '/user-profile',
     name: i18n.t('App.userProfile'),
     view: 'UserProfile',
