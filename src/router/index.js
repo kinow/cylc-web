@@ -54,7 +54,7 @@ Vue.use(Meta)
 router.beforeResolve((to, from, next) => {
   NProgress.start()
   if (to.name) {
-    if (['Tree'].includes(to.name)) {
+    if (['Tree', 'Dot'].includes(to.name)) {
       // When a workflow is being displayed, we set the title to a
       // different value.
       store.commit('app/setTitle', to.params.name)
