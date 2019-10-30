@@ -95,6 +95,20 @@ export default {
       }
       return []
     },
+    cyclepoints: function () {
+      const cyclepoints = []
+      if (this.currentWorkflow.length > 0) {
+        for (const cyclepoint of this.currentWorkflow[0].children) {
+          cyclepoints.push({
+            text: cyclepoint.name,
+            align: 'left',
+            sortable: false,
+            name: cyclepoint.name
+          })
+        }
+      }
+      return cyclepoints
+    },
     headers: function () {
       const headers = []
       if (!this.isTransposed) {
@@ -104,6 +118,7 @@ export default {
           sortable: false,
           name: 'name'
         })
+        headers.push(...this.cyclepoints)
       } else {
         headers.push({
           text: 'Point',
