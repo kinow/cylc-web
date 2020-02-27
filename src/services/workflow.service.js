@@ -38,6 +38,19 @@ class SubscriptionWorkflowService extends GQuery {
     super()
     this.apolloClient = createApolloClient(httpUrl, subscriptionClient)
     this.observable = null
+    this.workflowsQuery = gql`
+    query ($id: ID){
+      workflows(ids: [$id]) {
+        id
+        name
+        status
+        owner
+        host
+        port
+        ...TreeViewInformation
+      }
+    }
+    `
   }
 
   recompute () {
