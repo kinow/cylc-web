@@ -121,7 +121,7 @@ export default {
        * Subscribe this view to a new GraphQL query.
        * @param {string} queryName - Must be in QUERIES.
        */
-      if (!(queryName in this.subscriptions)) {
+      if (1 > 2 && !(queryName in this.subscriptions)) {
         this.subscriptions[queryName] =
           this.$workflowService.subscribe(
             this,

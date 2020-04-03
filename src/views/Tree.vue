@@ -18,12 +18,8 @@
 import { mixin } from '@/mixins/index'
 import { mapGetters, mapState } from 'vuex'
 import Tree from '@/components/cylc/tree/Tree'
-import { WORKFLOW_TREE_QUERY } from '@/graphql/queries'
-
-// query to retrieve all workflows
-const QUERIES = {
-  root: WORKFLOW_TREE_QUERY
-}
+import gql from 'graphql-tag'
+import { WORKFLOW_DATA_FRAGMENT, TREE_DATA_FRAGMENT } from '@/graphql/queries'
 
 export default {
   mixins: [mixin],
@@ -78,11 +74,25 @@ export default {
      */
     subscribe (queryName) {
       if (!(queryName in this.subscriptions)) {
+        const query = gql`
+          subscription TreeView ($ids: [ID]) {
+            workflows (ids: $ids) {
+              ...workflowData
+              ...treeData
+            }
+          }
+          ${WORKFLOW_DATA_FRAGMENT}
+          ${TREE_DATA_FRAGMENT}
+        `
         const workflowId = `${this.user.username}|${this.workflowName}`
+        const variables = {
+          ids: [workflowId]
+        }
         this.subscriptions[queryName] =
           this.$workflowService.subscribe(
             this,
-            QUERIES[queryName].replace('WORKFLOW_ID', workflowId)
+            query,
+            variables
           )
       }
     },

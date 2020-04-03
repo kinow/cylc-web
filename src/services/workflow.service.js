@@ -46,6 +46,28 @@ class SubscriptionWorkflowService extends GQuery {
     this.request()
   }
 
+  /**
+   * Subscribe a new query.
+   * @param {Object} view - The view to subscribe the query to.
+   * @param {string} query - The query to subscribe.
+   * @param {{string: string}} [variables] - The query variables.
+   * @return {number} The subscription ID (used for un-subscribing).
+   */
+  subscribe (view, query, variables = {}) {
+    const id = Math.random()
+    this.subscriptions.push({
+      id,
+      view,
+      query: query,
+      variables: variables,
+      active: false
+    })
+    this.query = query
+    this.variables = variables
+    this.request()
+    return id
+  }
+
   request () {
     /**
      * Perform a REST GraphQL request for all subscriptions.
@@ -64,6 +86,7 @@ class SubscriptionWorkflowService extends GQuery {
     }
     this.observable = this.apolloClient.subscribe({
       query: this.query,
+      variables: this.variables,
       fetchPolicy: 'no-cache'
     }).subscribe({
       next (response) {
