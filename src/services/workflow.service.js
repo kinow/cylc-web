@@ -27,6 +27,11 @@ import ZenObservable from 'zen-observable'
 import { DocumentNode } from 'graphql'
 /* eslint-enable no-unused-vars */
 
+import {
+  getIntrospectionQuery,
+  processMutations
+} from '@/services/mutation'
+
 class WorkflowService extends GQuery {
   /**
    * @constructor
@@ -49,6 +54,13 @@ class WorkflowService extends GQuery {
      */
     this.deltasObservable = null
     this.debug = process.env.NODE_ENV !== 'production'
+
+    // mutations defaults
+    this.mutations = null
+    this.types = null
+    this.associations = null
+
+    this.loadMutations()
   }
 
   // deltas subscriptions
@@ -182,6 +194,21 @@ class WorkflowService extends GQuery {
       variables: {
         workflow: workflowId
       }
+    })
+  }
+
+  loadMutations () {
+    // TODO: this assumes all workflows use the same schema which is and
+    // isn't necessarily true, not quite sure, come back to this later
+    this.apolloClient.query({
+      query: getIntrospectionQuery(),
+      fetchPolicy: 'no-cache'
+    }).then((response) => {
+      const mutations = response.data.__schema.mutationType.fields
+      this.types = response.data.__schema.types
+      // this.associations = associateMutations(mutations)
+      this.mutations = processMutations(mutations)
+      console.log(this.mutations)
     })
   }
 }
