@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const cylcObjects = Object.freeze({
+export const cylcObjects = Object.freeze({
   User: 'user',
   Workflow: 'workflow',
   CyclePoint: 'cycle point',
@@ -33,8 +33,10 @@ const identifierOrder = [
   cylcObjects.Job
 ]
 
-const mutationMapping = {
+export const mutationMapping = {
   // object: [[typeName: String, impliesMultiple: Boolean]]
+  user: [
+  ],
   workflow: [
     ['WorkflowID', false]
   ],
@@ -54,7 +56,19 @@ const mutationMapping = {
   ]
 }
 
-function tokenise (id) {
+export const compoundFields = {
+  WorkflowID: (tokens) => {
+    return `${tokens[cylcObjects.User]}|${tokens[cylcObjects.Workflow]}`
+  },
+  NamespaceIDGlob: (tokens) => {
+    return `${tokens[cylcObjects.Namespace]}.${tokens[cylcObjects.CyclePoint]}`
+  },
+  TaskID: (tokens) => {
+    return `${tokens[cylcObjects.Task]}.${tokens[cylcObjects.CyclePoint]}`
+  }
+}
+
+export function tokenise (id) {
   id = id.split('|')
   const ret = {}
   for (let ind = 0; ind < id.length; ind++) {
@@ -63,7 +77,7 @@ function tokenise (id) {
   return ret
 }
 
-function getType (tokens) {
+export function getType (tokens) {
   let last = null
   let item = null
   for (const key of identifierOrder) {
@@ -74,11 +88,4 @@ function getType (tokens) {
     last = key
   }
   return last
-}
-
-export {
-  cylcObjects,
-  tokenise,
-  getType,
-  mutationMapping
 }

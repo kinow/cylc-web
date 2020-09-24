@@ -68,7 +68,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <script>
 import {
   tokenise,
-  getType
+  getType,
+  compoundFields
 } from './index'
 
 import {
@@ -77,7 +78,7 @@ import {
 } from '@/services/mutation'
 
 import {
-  constructMutation
+  mutate
 } from '@/utils/graphql'
 
 export default {
@@ -116,14 +117,19 @@ export default {
   methods: {
     args (mutation) {
       const argspec = {}
+      let value = null
       for (const arg of mutation.args) {
         for (const token in this.tokens) {
           if (arg._cylcObject && arg._cylcObject === token) {
-            if (arg._multiple) {
-              argspec[arg.name] = [this.tokens[token]]
+            if (arg._cylcType in compoundFields) {
+              value = compoundFields[arg._cylcType](this.tokens)
             } else {
-              argspec[arg.name] = this.tokens[token]
+              value = this.tokens[token]
             }
+            if (arg._multiple) {
+              value = [value]
+            }
+            argspec[arg.name] = value
             break
           }
         }
@@ -136,9 +142,14 @@ export default {
     },
     mutate (mutation) {
       console.log(`% ${mutation._title}`)
-      console.log(this.args(mutation))
-      const mutilation = constructMutation(mutation)
-      console.log(mutilation)
+      const promise = mutate(
+        mutation,
+        this.args(mutation),
+        this.$workflowService.apolloClient
+      )
+      promise.then((status, ret) => {
+        console.log(status, ret)
+      })
     }
   }
 }

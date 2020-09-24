@@ -60,11 +60,13 @@ function processArguments (mutation, types) {
   let multiple = null
   let required = null
   let cylcObject = null
+  let cylcType = null
   for (const arg of mutation.args) {
     pointer = arg.type
     multiple = false
     required = false
     cylcObject = null
+    cylcType = null
     while (pointer) {
       // walk down the nested type tree
       if (pointer.kind === 'LIST') {
@@ -78,6 +80,7 @@ function processArguments (mutation, types) {
           ) {
             if (pointer.name === type) {
               cylcObject = objectName
+              cylcType = pointer.name
               if (impliesMultiple) {
                 multiple = true
               }
@@ -96,6 +99,7 @@ function processArguments (mutation, types) {
     }
     arg._title = camelToWords(arg.name)
     arg._cylcObject = cylcObject
+    arg._cylcType = cylcType
     arg._multiple = multiple
     arg._required = required
     if (arg.defaultValue) {

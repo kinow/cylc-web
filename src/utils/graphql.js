@@ -27,6 +27,7 @@ import { getMainDefinition } from '@apollo/client/utilities'
 import { WebSocketLink } from '@apollo/client/link/ws'
 import { SubscriptionClient } from 'subscriptions-transport-ws'
 import store from '@/store'
+import gql from 'graphql-tag'
 
 /**
  * Create the HTTP and WebSocket URLs for an ApolloClient.
@@ -260,4 +261,42 @@ export function constructMutation (mutation) {
       }
     }
   `.trim()
+}
+
+// enumeration for the mutation status, maps onto Cylc Task status
+export const status = {
+  waiting: 'waiting',
+  submitted: 'submitted',
+  succeeded: 'succeeded',
+  failed: 'failed',
+  submitFailed: 'submit-failed'
+}
+Object.freeze(status)
+
+export async function mutate (mutation, args, apolloClient) {
+  console.log(
+    constructMutation(mutation)
+  )
+  console.log(
+    args
+  )
+  let result = null
+  try {
+    result = await apolloClient.mutate({
+      mutation: gql(constructMutation(mutation)),
+      variables: args
+    })
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(err)
+    return [status.submitFailed, err]
+  }
+  const responses = result.data[mutation.name].result
+  if (responses && responses.length === 1) {
+    return [status.submitted, responses[0].response]
+  }
+  return [status.failed, result]
+  // TODO: this is actually submit failed but leave it like this until we are
+  // ready as it helps differentiate
+  // return [status.submitFailed, result]
 }
