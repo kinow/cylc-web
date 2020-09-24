@@ -23,8 +23,11 @@ import {
 import {
   mutationMapping
 } from '@/components/cylc/cylcObject'
+import {
+  getNullValue
+} from '@/utils/graphql'
 
-function tokensToArgs (mutation, tokens) {
+export function tokensToArgs (mutation, tokens) {
   const ret = {}
   for (const token in tokens) {
     for (const arg of mutation.args) {
@@ -41,31 +44,24 @@ function camelToWords (camel) {
   return result.charAt(0).toUpperCase() + result.slice(1)
 }
 
-function processMutations (mutations) {
-  const ret = {}
+export function processMutations (mutations, types) {
   let descLines = null
   for (const mutation of mutations) {
     descLines = mutation.description.split(/\n+/)
-    ret[mutation.name] = {
-      name: mutation.name,
-      title: camelToWords(mutation.name),
-      description: descLines[0],
-      help: descLines.slice(1).join('\n'),
-      args: getArgspec(mutation),
-      gqlMutation: mutation
-    }
+    mutation._title = camelToWords(mutation.name)
+    mutation._shortDescription = descLines[0]
+    mutation._help = descLines.slice(1).join('\n')
+    processArguments(mutation, types)
   }
-  return ret
 }
 
-function getArgspec (mutation) {
-  const args = []
+function processArguments (mutation, types) {
   let pointer = null
   let multiple = null
   let required = null
   let cylcObject = null
-  for (const argument of mutation.args) {
-    pointer = argument.type
+  for (const arg of mutation.args) {
+    pointer = arg.type
     multiple = false
     required = false
     cylcObject = null
@@ -98,17 +94,19 @@ function getArgspec (mutation) {
       }
       pointer = pointer.ofType
     }
-    args.push({
-      name: argument.name,
-      cylcObject,
-      multiple,
-      required
-    })
+    arg._title = camelToWords(arg.name)
+    arg._cylcObject = cylcObject
+    arg._multiple = multiple
+    arg._required = required
+    if (arg.defaultValue) {
+      arg._default = JSON.parse(arg.defaultValue)
+    } else {
+      arg._default = getNullValue(arg.type, types)
+    }
   }
-  return args
 }
 
-function listMutations (mutations) {
+export function listMutations (mutations) {
   const names = []
   if (!this.mutations) {
     return names
@@ -119,7 +117,7 @@ function listMutations (mutations) {
   return names
 }
 
-function getIntrospectionQuery () {
+export function getIntrospectionQuery () {
   // we are only interested in mutations so can make our life
   // a little easier by restricting the scope of the default
   // introspection query
@@ -151,7 +149,7 @@ function getIntrospectionQuery () {
   )
 }
 
-function getMutation (name) {
+export function getMutation (name) {
   if (name === 'sampleMutation') {
     return this.sampleMutation
   }
@@ -164,7 +162,7 @@ function getMutation (name) {
 
 /* Return names of mutations which relate to the provided object type.
  */
-function filterAssociations (cylcObject, tokens, mutations) {
+export function filterAssociations (cylcObject, tokens, mutations) {
   const satisfied = []
   const all = []
   let requiresInfo = false
@@ -175,16 +173,16 @@ function filterAssociations (cylcObject, tokens, mutations) {
     applies = false
     mutation = mutations[mutationName]
     for (const arg of mutation.args) {
-      if (arg.cylcObject) {
-        if (arg.cylcObject === cylcObject) {
+      if (arg._cylcObject) {
+        if (arg._cylcObject === cylcObject) {
           applies = true
         }
-        if (tokens[arg.cylcObject]) {
+        if (tokens[arg._cylcObject]) {
           // pass
         } else {
           requiresInfo = true
         }
-      } else if (arg.required) {
+      } else if (arg._required) {
         requiresInfo = true
       }
     }
@@ -197,13 +195,4 @@ function filterAssociations (cylcObject, tokens, mutations) {
     }
   }
   return [satisfied, all]
-}
-
-export {
-  tokensToArgs,
-  getIntrospectionQuery,
-  filterAssociations,
-  getMutation,
-  listMutations,
-  processMutations
 }

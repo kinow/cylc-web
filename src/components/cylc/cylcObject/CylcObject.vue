@@ -33,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <slot></slot>
         </span>
       </template>
-      <v-list>
+      <v-list dense>
         <v-subheader>{{id}}</v-subheader>
         <v-list-item-group v-model="mutation" color="primary">
           <!--<pre>{{this.$workflowService.mutations}}</pre>-->
@@ -49,10 +49,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <!--  <v-icon></v-icon>-->
             <!--</v-list-item-icon>-->
             <v-list-item-title>
-              <span>{{mutation.title}}</span>
+              <span>{{mutation._title}}</span>
             </v-list-item-title>
             <v-list-item-subtitle>
-              <span>{{mutation.description}}</span>
+              <span>{{mutation._shortDescription}}</span>
             </v-list-item-subtitle>
             <!--<v-list-item-action>-->
             <!--  <v-btn rounded color="primary" dark>Foo</v-btn>-->
@@ -76,7 +76,9 @@ import {
   // tokensToArgs
 } from '@/services/mutation'
 
-import { constructMutation } from '@/utils/graphql'
+import {
+  constructMutation
+} from '@/utils/graphql'
 
 export default {
   name: 'CylcObject',
@@ -116,21 +118,26 @@ export default {
       const argspec = {}
       for (const arg of mutation.args) {
         for (const token in this.tokens) {
-          if (arg.cylcObject && arg.cylcObject === token) {
-            if (arg.multiple) {
+          if (arg._cylcObject && arg._cylcObject === token) {
+            if (arg._multiple) {
               argspec[arg.name] = [this.tokens[token]]
             } else {
               argspec[arg.name] = this.tokens[token]
             }
+            break
           }
         }
+        if (!argspec[arg.name]) {
+          argspec[arg.name] = arg._default
+        }
       }
+      // defaultValue = getNullValue(arg.type, this.types)
       return argspec
     },
     mutate (mutation) {
-      console.log(`% ${mutation.title}`)
+      console.log(`% ${mutation._title}`)
       console.log(this.args(mutation))
-      const mutilation = constructMutation(mutation.gqlMutation)
+      const mutilation = constructMutation(mutation)
       console.log(mutilation)
     }
   }

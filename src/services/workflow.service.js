@@ -204,10 +204,10 @@ class WorkflowService extends GQuery {
       query: getIntrospectionQuery(),
       fetchPolicy: 'no-cache'
     }).then((response) => {
-      const mutations = response.data.__schema.mutationType.fields
+      this.mutations = response.data.__schema.mutationType.fields
       this.types = response.data.__schema.types
+      processMutations(this.mutations, this.types)
       // this.associations = associateMutations(mutations)
-      this.mutations = processMutations(mutations)
       console.log(this.mutations)
     })
   }
