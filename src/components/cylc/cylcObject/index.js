@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* Enum of Cylc "things". */
 export const cylcObjects = Object.freeze({
   User: 'user',
   Workflow: 'workflow',
@@ -24,6 +25,7 @@ export const cylcObjects = Object.freeze({
   Job: 'job'
 })
 
+/* Cylc things in hierarchy order. */
 const identifierOrder = [
   cylcObjects.User,
   cylcObjects.Workflow,
@@ -33,6 +35,7 @@ const identifierOrder = [
   cylcObjects.Job
 ]
 
+/* Mapping of mutation argument types to Cylc "things". */
 export const mutationMapping = {
   // object: [[typeName: String, impliesMultiple: Boolean]]
   user: [
@@ -56,6 +59,31 @@ export const mutationMapping = {
   ]
 }
 
+/* Translate a global ID into a token dictionary. */
+export function tokenise (id) {
+  id = id.split('|')
+  const ret = {}
+  for (let ind = 0; ind < id.length; ind++) {
+    ret[identifierOrder[ind]] = id[ind]
+  }
+  return ret
+}
+
+/* Return the lowest token in the hierarchy. */
+export function getType (tokens) {
+  let last = null
+  let item = null
+  for (const key of identifierOrder) {
+    item = tokens[key]
+    if (!item) {
+      break
+    }
+    last = key
+  }
+  return last
+}
+
+/* Mutation argument types which are derived from more than one token. */
 export const compoundFields = {
   WorkflowID: (tokens) => {
     return `${tokens[cylcObjects.User]}|${tokens[cylcObjects.Workflow]}`
@@ -68,24 +96,29 @@ export const compoundFields = {
   }
 }
 
-export function tokenise (id) {
-  id = id.split('|')
-  const ret = {}
-  for (let ind = 0; ind < id.length; ind++) {
-    ret[identifierOrder[ind]] = id[ind]
-  }
-  return ret
-}
-
-export function getType (tokens) {
-  let last = null
-  let item = null
-  for (const key of identifierOrder) {
-    item = tokens[key]
-    if (!item) {
-      break
+/* Return arguments for the provided mutation which can be obtained from
+ * the provided tokens */
+export function getMutationArgsFromTokens (mutation, tokens) {
+  const argspec = {}
+  let value = null
+  for (const arg of mutation.args) {
+    for (const token in tokens) {
+      if (arg._cylcObject && arg._cylcObject === token) {
+        if (arg._cylcType in compoundFields) {
+          value = compoundFields[arg._cylcType](tokens)
+        } else {
+          value = tokens[token]
+        }
+        if (arg._multiple) {
+          value = [value]
+        }
+        argspec[arg.name] = value
+        break
+      }
     }
-    last = key
+    if (!argspec[arg.name]) {
+      argspec[arg.name] = arg._default
+    }
   }
-  return last
+  return argspec
 }

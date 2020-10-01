@@ -30,7 +30,7 @@ import { DocumentNode } from 'graphql'
 import {
   getIntrospectionQuery,
   processMutations
-} from '@/services/mutation'
+} from '@/utils/mutation'
 
 class WorkflowService extends GQuery {
   /**

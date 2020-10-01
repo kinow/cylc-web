@@ -274,12 +274,6 @@ export const status = {
 Object.freeze(status)
 
 export async function mutate (mutation, args, apolloClient) {
-  console.log(
-    constructMutation(mutation)
-  )
-  console.log(
-    args
-  )
   let result = null
   try {
     result = await apolloClient.mutate({
@@ -295,8 +289,5 @@ export async function mutate (mutation, args, apolloClient) {
   if (responses && responses.length === 1) {
     return [status.submitted, responses[0].response]
   }
-  return [status.failed, result]
-  // TODO: this is actually submit failed but leave it like this until we are
-  // ready as it helps differentiate
-  // return [status.submitFailed, result]
+  return [status.submitFailed, result]
 }

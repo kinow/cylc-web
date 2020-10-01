@@ -19,14 +19,35 @@ import {
   getIntrospectionQuery as getGraphQLIntrospectionQuery,
   print
 } from 'graphql'
-// import { constructMutation } from '@/utils/graphql'
 import {
   mutationMapping
 } from '@/components/cylc/cylcObject'
 import {
   getNullValue
 } from '@/utils/graphql'
+import {
+  mdiCloseCircle,
+  mdiCog,
+  mdiCursorPointer,
+  mdiDelete,
+  mdiPause,
+  mdiPlay,
+  mdiRefreshCircle
+} from '@mdi/js'
 
+/* Icons for each mutation.
+ * {mutation.name: svgIcon} */
+const mutationIcons = {
+  '': mdiCog, // default fallback
+  hold: mdiPause,
+  release: mdiPlay,
+  kill: mdiCloseCircle,
+  poll: mdiRefreshCircle,
+  remove: mdiDelete,
+  trigger: mdiCursorPointer
+}
+
+/* Return arguments for the provided mutation from the token context. */
 export function tokensToArgs (mutation, tokens) {
   const ret = {}
   for (const token in tokens) {
@@ -39,22 +60,26 @@ export function tokensToArgs (mutation, tokens) {
   return ret
 }
 
+/* Convert camel case to words. */
 function camelToWords (camel) {
   const result = camel.replace(/([A-Z])/g, ' $1')
   return result.charAt(0).toUpperCase() + result.slice(1)
 }
 
+/* Add special fields to mutations from a GraphQL introspection query. */
 export function processMutations (mutations, types) {
   let descLines = null
   for (const mutation of mutations) {
     descLines = mutation.description.split(/\n+/)
     mutation._title = camelToWords(mutation.name)
+    mutation._icon = mutationIcons[mutation.name] || mutationIcons['']
     mutation._shortDescription = descLines[0]
     mutation._help = descLines.slice(1).join('\n')
     processArguments(mutation, types)
   }
 }
 
+/* Add special fields to mutations args from a GraphQL introspection query. */
 function processArguments (mutation, types) {
   let pointer = null
   let multiple = null
@@ -110,17 +135,6 @@ function processArguments (mutation, types) {
   }
 }
 
-export function listMutations (mutations) {
-  const names = []
-  if (!this.mutations) {
-    return names
-  }
-  for (const mutation of this.mutations) {
-    names.push(mutation.name)
-  }
-  return names
-}
-
 export function getIntrospectionQuery () {
   // we are only interested in mutations so can make our life
   // a little easier by restricting the scope of the default
@@ -164,8 +178,7 @@ export function getMutation (name) {
   }
 }
 
-/* Return names of mutations which relate to the provided object type.
- */
+/* Return names of mutations which relate to the provided object type. */
 export function filterAssociations (cylcObject, tokens, mutations) {
   const satisfied = []
   const all = []
