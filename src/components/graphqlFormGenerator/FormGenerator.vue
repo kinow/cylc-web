@@ -79,7 +79,7 @@ import VueMarkdown from 'vue-markdown'
 import cloneDeep from 'lodash/cloneDeep'
 
 import FormInput from '@/components/graphqlFormGenerator/FormInput'
-import { getNullValue } from '@/utils/graphql'
+import { getNullValue } from '@/utils/aotf'
 
 export default {
   name: 'form-generator',

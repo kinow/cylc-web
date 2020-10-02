@@ -86,19 +86,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <script>
 import {
-  tokenise,
+  filterAssociations,
+  getMutationArgsFromTokens,
   getType,
-  getMutationArgsFromTokens
-} from './index'
-
-import {
-  filterAssociations
-  // tokensToArgs
-} from '@/utils/mutation'
-
-import {
-  mutate
-} from '@/utils/graphql'
+  mutate,
+  tokenise
+} from '@/utils/aotf'
 
 export default {
   name: 'CylcObject',

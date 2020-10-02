@@ -52,7 +52,7 @@ import gql from 'graphql-tag'
 
 import FormGenerator from '@/components/graphqlFormGenerator/FormGenerator'
 import Task from '@/components/cylc/Task'
-import { constructMutation } from '@/utils/graphql'
+import { constructMutation } from '@/utils/aotf'
 
 // enumeration for the mutation status, maps onto Cylc Task status
 const status = {

@@ -30,7 +30,7 @@ import { DocumentNode } from 'graphql'
 import {
   getIntrospectionQuery,
   processMutations
-} from '@/utils/mutation'
+} from '@/utils/aotf'
 
 class WorkflowService extends GQuery {
   /**
@@ -207,8 +207,6 @@ class WorkflowService extends GQuery {
       this.mutations = response.data.__schema.mutationType.fields
       this.types = response.data.__schema.types
       processMutations(this.mutations, this.types)
-      // this.associations = associateMutations(mutations)
-      console.log(this.mutations)
     })
   }
 }

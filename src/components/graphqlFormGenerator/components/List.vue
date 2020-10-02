@@ -66,7 +66,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <script>
 import { formElement } from '@/components/graphqlFormGenerator/mixins'
-import { getNullValue } from '@/utils/graphql'
+import { getNullValue } from '@/utils/aotf'
 import { mdiPlusCircle, mdiCloseCircle } from '@mdi/js'
 
 export default {
