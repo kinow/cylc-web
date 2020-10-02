@@ -61,7 +61,7 @@ export const mutationMapping = {
 
 /* Translate a global ID into a token dictionary. */
 export function tokenise (id) {
-  id = id.split('|')
+  id = (id || '').split('|')
   const ret = {}
   for (let ind = 0; ind < id.length; ind++) {
     ret[identifierOrder[ind]] = id[ind]
