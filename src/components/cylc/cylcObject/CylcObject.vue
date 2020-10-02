@@ -33,7 +33,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           >
             <!-- the wrapped component -->
             <template v-slot:activator="{ on, attrs }">
-              <span v-bind="attrs" v-on="on">
+              <span
+                v-bind="attrs"
+                v-on="on"
+                @click="listMutations()"
+              >
+                <!-- Note: we filter mutations on click -->
                 <slot></slot>
               </span>
             </template>
@@ -115,6 +120,12 @@ export default {
     }
   },
 
+  data: () => {
+    return {
+      mutations: []
+    }
+  },
+
   computed: {
     /* A dict of tokens representing the object context. */
     tokens () {
@@ -123,22 +134,22 @@ export default {
     /* The token representing this object. */
     type () {
       return getType(this.tokens)
-    },
-    /* List of mutations applicable to this object
-     * Note: currently filtered by just the ones we can call without additional
-     *       info.
-     */
-    mutations () {
-      // TODO - this gets computed on load which is bad
-      return filterAssociations(
-        this.type,
-        this.tokens,
-        this.$workflowService.mutations
-      )[0]
     }
   },
 
   methods: {
+    /* List of mutations applicable to this object
+     * Note: currently filtered by just the ones we can call without additional
+     *       info.
+     */
+    listMutations () {
+      this.mutations = filterAssociations(
+        this.type,
+        this.tokens,
+        this.$workflowService.mutations
+      )[0]
+    },
+
     /* Call a mutation using only the tokens for args. */
     callMutationFromContext (mutation) {
       console.debug(`mutation: ${mutation._title} ${this.id}`)
