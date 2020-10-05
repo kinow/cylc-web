@@ -145,6 +145,7 @@ export default {
 
     /* Call a mutation using only the tokens for args. */
     callMutationFromContext (mutation) {
+      // eslint-disable-next-line no-console
       console.debug(`mutation: ${mutation._title} ${this.id}`)
       const promise = mutate(
         mutation,
@@ -152,6 +153,7 @@ export default {
         this.$workflowService.apolloClient
       )
       promise.then((status, ret) => {
+        // eslint-disable-next-line no-console
         console.debug(status, ret)
       })
     }
