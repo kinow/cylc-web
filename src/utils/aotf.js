@@ -112,15 +112,34 @@ mutationMapping[cylcObjects.Job] = [
  */
 export const compoundFields = {
   WorkflowID: (tokens) => {
-    return `${tokens[cylcObjects.User]}|${tokens[cylcObjects.Workflow]}`
+    if (tokens[cylcObjects.User]) {
+      return `${tokens[cylcObjects.User]}|${tokens[cylcObjects.Workflow]}`
+    }
+    // don't provide user if not specified
+    // (will fallback to the UIs user)
+    return tokens[cylcObjects.Workflow]
   },
   NamespaceIDGlob: (tokens) => {
-    return `${tokens[cylcObjects.Namespace]}.${tokens[cylcObjects.CyclePoint]}`
+    // expand unspecified fields to '*'
+    return tokens[cylcObjects.Namespace] || '*' +
+      '.' +
+      tokens[cylcObjects.CyclePoint] || '*'
   },
   TaskID: (tokens) => {
-    return `${tokens[cylcObjects.Task]}.${tokens[cylcObjects.CyclePoint]}`
+    // expand unspecified fields to '*'
+    return tokens[cylcObjects.Task] || '*' +
+      '.' +
+      tokens[cylcObjects.CyclePoint] || '*'
   }
 }
+
+/**
+ * Namespaces which can be used to satisfy a field representing a different
+ * object
+ */
+export const alternateFields = {}
+// cycle points can be used as namespace identifiers
+alternateFields.NamespaceIDGlob = cylcObjects.CyclePoint
 
 /**
  * Used to communicate the status of requested mutations.
@@ -339,17 +358,23 @@ export function filterAssociations (cylcObject, tokens, mutations) {
   let requiresInfo = false
   let applies = false
   let mutation = null
-  for (const mutationName in mutations) {
+  let alternate = null
+  for (const ind in mutations) {
     requiresInfo = false
     applies = false
-    mutation = mutations[mutationName]
+    mutation = mutations[ind]
     for (const arg of mutation.args) {
       if (arg._cylcObject) {
+        // alternate cylc object which can satisfy this field, or null
+        alternate = alternateFields[arg._cylcType]
         if (arg._cylcObject === cylcObject) {
           // this is the object type we are filtering for
           applies = true
+        } else if (alternate === cylcObject) {
+          // this isn't the object type we are filtering for, but it'll do
+          applies = true
         }
-        if (tokens[arg._cylcObject]) {
+        if (tokens[cylcObject]) {
           // this can be satisfied by the context
         } else if (arg._required) {
           // this cannot be satisfied by the context
@@ -505,9 +530,14 @@ export function constructMutation (mutation) {
 export function getMutationArgsFromTokens (mutation, tokens) {
   const argspec = {}
   let value = null
+  let alternate = null
   for (const arg of mutation.args) {
-    for (const token in tokens) {
-      if (arg._cylcObject && arg._cylcObject === token) {
+    alternate = alternateFields[arg._cylcType]
+    for (let token in tokens) {
+      if (arg._cylcObject && [token, alternate].indexOf(arg._cylcObject)) {
+        if (arg._cylcObject === alternate) {
+          token = alternate
+        }
         if (arg._cylcType in compoundFields) {
           value = compoundFields[arg._cylcType](tokens)
         } else {
