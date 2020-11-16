@@ -32,50 +32,52 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <!-- the node value -->
       <!-- TODO: revisit these values that can be replaced by constants later (and in other components too). -->
       <div :class="getNodeDataClass()" @click="nodeClicked" v-if="node.type === 'cyclepoint'">
-        <CylcObject :id="node.node.id">
-          <task
-           :status="node.node.state"
-           :isHeld="node.node.isHeld"
-           :progress=0
-          />
-        </CylcObject>
+        <task
+          v-cylc-object
+          :id="node.node.id"
+          :status="node.node.state"
+          :isHeld="node.node.isHeld"
+          :progress=0
+        />
         <span class="mx-1">{{ node.node.name }}</span>
       </div>
       <div :class="getNodeDataClass()" @click="nodeClicked" v-else-if="node.type === 'family-proxy'">
-        <CylcObject :id="node.node.id">
-          <task
-           :status="node.node.state"
-           :isHeld="node.node.isHeld"
-           :progress="node.node.progress"
-          />
-        </CylcObject>
+        <task
+          v-cylc-object
+          :id="node.node.id"
+          :status="node.node.state"
+          :isHeld="node.node.isHeld"
+          :progress="node.node.progress"
+        />
         <span class="mx-1">{{ node.node.name }}</span>
       </div>
       <div :class="getNodeDataClass()" @click="nodeClicked" v-else-if="node.type === 'task-proxy'">
-        <CylcObject :id="node.node.id">
-          <task
-           :status="node.node.state"
-           :isHeld="node.node.isHeld"
-           :progress="node.node.progress"
-          />
-        </CylcObject>
+        <task
+          v-cylc-object
+          :id="node.node.id"
+          :status="node.node.state"
+          :isHeld="node.node.isHeld"
+          :progress="node.node.progress"
+        />
         <span class="mx-1">{{ node.node.name }}</span>
         <div v-if="!isExpanded" class="node-summary">
           <!-- Task summary -->
-          <CylcObject
-              v-for="(task, index) in node.children"
-              :id="task.id"
-              :key="`${task.id}-summary-${index}`"
-          >
-            <job :status="task.node.state" />
-          </CylcObject>
+          <job
+            v-cylc-object
+            v-for="(task, index) in node.children"
+            :id="task.id"
+            :key="`${task.id}-summary-${index}`"
+            :status="task.node.state"
+          />
         </div>
       </div>
       <div :class="getNodeDataClass()" v-else-if="node.type === 'job'">
         <div :class="getNodeDataClass()" @click="jobNodeClicked">
-          <CylcObject :id="node.node.id">
-            <job :status="node.node.state" />
-          </CylcObject>
+          <job
+            v-cylc-object
+            :id="node.node.id"
+            :status="node.node.state"
+          />
           <span class="mx-1">#{{ node.node.submitNum }}</span>
           <span class="grey--text">{{ node.node.host }}</span>
         </div>
@@ -116,7 +118,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <script>
 import Task from '@/components/cylc/Task'
-import CylcObject from '@/components/cylc/cylcObject/CylcObject'
 import Job from '@/components/cylc/Job'
 import { treeitem } from '@/mixins/treeitem'
 
@@ -133,8 +134,7 @@ export default {
   ],
   components: {
     task: Task,
-    job: Job,
-    CylcObject: CylcObject
+    job: Job
   },
   props: {
     node: {
