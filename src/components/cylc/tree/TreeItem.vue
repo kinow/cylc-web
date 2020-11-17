@@ -33,8 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <!-- TODO: revisit these values that can be replaced by constants later (and in other components too). -->
       <div :class="getNodeDataClass()" @click="nodeClicked" v-if="node.type === 'cyclepoint'">
         <task
-          v-cylc-object
-          :id="node.node.id"
+          v-cylc-object="node.node.id"
           :status="node.node.state"
           :isHeld="node.node.isHeld"
           :progress=0
@@ -43,8 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </div>
       <div :class="getNodeDataClass()" @click="nodeClicked" v-else-if="node.type === 'family-proxy'">
         <task
-          v-cylc-object
-          :id="node.node.id"
+          v-cylc-object="node.node.id"
           :status="node.node.state"
           :isHeld="node.node.isHeld"
           :progress="node.node.progress"
@@ -53,8 +51,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </div>
       <div :class="getNodeDataClass()" @click="nodeClicked" v-else-if="node.type === 'task-proxy'">
         <task
-          v-cylc-object
-          :id="node.node.id"
+          v-cylc-object="node.node.id"
           :status="node.node.state"
           :isHeld="node.node.isHeld"
           :progress="node.node.progress"
@@ -63,9 +60,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <div v-if="!isExpanded" class="node-summary">
           <!-- Task summary -->
           <job
-            v-cylc-object
+            v-cylc-object="task.id"
             v-for="(task, index) in node.children"
-            :id="task.id"
             :key="`${task.id}-summary-${index}`"
             :status="task.node.state"
           />
@@ -74,8 +70,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <div :class="getNodeDataClass()" v-else-if="node.type === 'job'">
         <div :class="getNodeDataClass()" @click="jobNodeClicked">
           <job
-            v-cylc-object
-            :id="node.node.id"
+            v-cylc-object="node.node.id"
             :status="node.node.state"
           />
           <span class="mx-1">#{{ node.node.submitNum }}</span>
