@@ -16,6 +16,11 @@
  */
 
 import CylcObject from '@/components/cylc/cylcObject/CylcObject'
+import {
+  filterAssociations,
+  getType,
+  tokenise
+} from '@/utils/aotf'
 
 /**
  * Cylc Objects plug-in.
@@ -28,19 +33,34 @@ export default {
    */
   install (Vue, options) {
     // We could...
-
     // register the CylcObject component globally (no need to import)
     Vue.component('cylc-object', CylcObject)
 
     // add a global directive
     Vue.directive('cylc-object', {
       bind (el, binding, vnode, oldVnode) {
-        // define that a cylc-object will have an @click and automagically
-        // trigger an event?
+        console.log('BIND!')
+        const id = el.getAttribute('id')
+        const tokens = tokenise(id)
+        const type = getType(tokens)
+        el.addEventListener('click', () => {
+          debugger
+          const mutations = this.listMutations(type, tokens)
+          // set the mutations
+          this.$emit('show-mutations-menu', mutations)
+        })
       }
     })
 
     // create a singleton in the application to listen for events
-    Vue.prototype.$cylcObjectsMenu = {}
+    // Vue.prototype.$cylcObjectsMenu = {}
+  },
+
+  listMutations (type, tokens) {
+    return filterAssociations(
+      type,
+      tokens,
+      this.$workflowService.mutations
+    )[0]
   }
 }

@@ -35,6 +35,7 @@ import store from '@/store'
  */
 import SubscriptionWorkflowService from 'workflow-service'
 import { createGraphQLUrls, createSubscriptionClient } from '@/utils/graphql'
+import CylcObjectPlugin from '@/components/cylc/cylcObject/plugin'
 
 // WorkflowService singleton available application-wide
 // On the offline mode, we do not have a WebSocket link, so we must create a null SubscriptionClient to use an empty link
@@ -47,6 +48,10 @@ const workflowService = new SubscriptionWorkflowService(graphQLUrls.httpUrl, sub
 Vue.prototype.$workflowService = workflowService
 
 Vue.config.productionTip = false
+
+// load Cylc Object mutations plug-in
+
+Vue.use(CylcObjectPlugin)
 
 /* eslint-disable no-new */
 const app = new Vue({
