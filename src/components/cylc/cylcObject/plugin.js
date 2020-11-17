@@ -21,6 +21,15 @@ import {
   getType,
   tokenise
 } from '@/utils/aotf'
+import Vue from 'vue'
+
+function listMutations (type, tokens) {
+  return filterAssociations(
+    type,
+    tokens,
+    Vue.prototype.$workflowService.mutations
+  )[0]
+}
 
 /**
  * Cylc Objects plug-in.
@@ -44,8 +53,7 @@ export default {
         const tokens = tokenise(id)
         const type = getType(tokens)
         el.addEventListener('click', () => {
-          debugger
-          const mutations = this.listMutations(type, tokens)
+          const mutations = listMutations(type, tokens)
           // set the mutations
           this.$emit('show-mutations-menu', mutations)
         })
@@ -54,13 +62,5 @@ export default {
 
     // create a singleton in the application to listen for events
     // Vue.prototype.$cylcObjectsMenu = {}
-  },
-
-  listMutations (type, tokens) {
-    return filterAssociations(
-      type,
-      tokens,
-      this.$workflowService.mutations
-    )[0]
   }
 }
