@@ -1,0 +1,43 @@
+name: Release stage 1 - create release PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version
+        required: true
+      branch:
+        description: The branch to open the PR against
+        required: false
+        default: 'master'
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+
+      - name: Sanitise workflow inputs # Should be 1st step
+        uses: cylc/release-actions/stage-1/sanitize-inputs@v1
+
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.BASE_REF }}
+
+      - name: Create & checkout PR branch
+        uses: cylc/release-actions/stage-1/checkout-pr-branch@v1
+
+      - name: Set the package version
+        run: npm version ${env.VERSION}
+
+      - name: Update "released on" date in changelog
+        continue-on-error: true
+        uses: cylc/release-actions/stage-1/update-changelog-release-date@v1
+        with:
+          changelog-file: 'CHANGES.md'
+
+      - name: Create pull request
+        uses: cylc/release-actions/stage-1/create-release-pr@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
