@@ -16,7 +16,7 @@ jobs:
   publish:
     if: >-  # NOTE: Can't use top-level env here unfortunately
       github.event.pull_request.merged == true &&
-      contains(github.event.pull_request.labels.*.name, 'Prepare release:')
+      contains(github.event.pull_request.labels.*.name, 'release:')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
