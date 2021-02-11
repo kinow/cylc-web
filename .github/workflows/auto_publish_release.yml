@@ -39,11 +39,11 @@ jobs:
 
       - name: Create ZIP archive
         run: |
-          cd dist && zip -r "../cylc-ui-${env.VERSION}-dist.zip" *
+          cd dist && zip -r ../cylc-ui-${{ env.VERSION }}-dist.zip *
 
       - name: sha256sum
         run: |
-          SHA256SUM=$(sha256sum ../cylc-ui-${env.VERSION}-dist.zip)
+          SHA256SUM=$(sha256sum ../cylc-ui-${{ env.VERSION }}-dist.zip)
           echo "SHA256SUM=$SHA256SUM" >> $GITHUB_ENV
 
       - name: Publish GitHub release
@@ -70,8 +70,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./cylc-ui-${env.VERSION}-dist.zip
-          asset_name: cylc-ui-${env.VERSION}-dist.zip
+          asset_path: ./cylc-ui-${{ env.VERSION }}-dist.zip
+          asset_name: cylc-ui-${{ env.VERSION }}-dist.zip
           asset_content_type: application/zip
 
       - name: Comment on the release PR with the results & next steps
