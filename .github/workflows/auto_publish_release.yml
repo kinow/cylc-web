@@ -32,6 +32,11 @@ jobs:
       - name: Build
         run: yarn build --optimize
 
+      - name: Get the version number
+        run: |
+          VERSION=$(node -p -e "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Create ZIP archive
         run: cd dist && zip -r ../cylc-ui-${env.VERSION}-dist.zip *
 
@@ -39,11 +44,6 @@ jobs:
         run: |
           SHA256SUM=$(sha256sum ../cylc-ui-${env.VERSION}-dist.zip)
           echo "SHA256SUM=$SHA256SUM" >> $GITHUB_ENV
-
-      - name: Get the version number
-        run: |
-          VERSION=$(node -p -e "require('./package.json').version")
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Publish GitHub release
         id: create_release
