@@ -38,7 +38,8 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Create ZIP archive
-        run: cd dist && zip -r ../cylc-ui-${env.VERSION}-dist.zip *
+        run: |
+          cd dist && zip -r "../cylc-ui-${env.VERSION}-dist.zip" *
 
       - name: sha256sum
         run: |
