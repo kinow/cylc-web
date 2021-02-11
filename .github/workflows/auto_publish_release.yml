@@ -43,7 +43,7 @@ jobs:
 
       - name: sha256sum
         run: |
-          SHA256SUM=$(sha256sum ../cylc-ui-${{ env.VERSION }}-dist.zip)
+          SHA256SUM=$(sha256sum cylc-ui-${{ env.VERSION }}-dist.zip)
           echo "SHA256SUM=$SHA256SUM" >> $GITHUB_ENV
 
       - name: Publish GitHub release
