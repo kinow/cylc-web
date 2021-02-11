@@ -29,7 +29,8 @@ jobs:
         uses: cylc/release-actions/stage-1/checkout-pr-branch@v1
 
       - name: Set the package version
-        run: npm version ${env.VERSION}
+        run: |
+          npm version $VERSION
 
       - name: Update "released on" date in changelog
         continue-on-error: true
