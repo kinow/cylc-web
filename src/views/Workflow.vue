@@ -100,6 +100,7 @@ export default {
     CylcObjectMenu,
     Lumino,
     TreeComponent,
+    TableComponent,
     MutationsView,
     Toolbar
   },
@@ -110,7 +111,7 @@ export default {
   },
   data: () => ({
     deltaSubscriptions: [],
-    deltaTablesSubscriptions: [],
+    deltaTableSubscriptions: [],
     /**
      * The CylcTree object, which receives delta updates. We must have only one for this
      * view, and it should contain data only while the tree subscription is active (i.e.
