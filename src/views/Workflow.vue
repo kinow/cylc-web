@@ -86,7 +86,8 @@ import CylcObjectMenu from '@/components/cylc/cylcObject/Menu'
 export default {
   mixins: [
     mixin,
-    datatree
+    datatree,
+    datatable
   ],
   name: 'Workflow',
   props: {
@@ -102,13 +103,14 @@ export default {
     MutationsView,
     Toolbar
   },
-  metaInfo() {
+  metaInfo () {
     return {
-      title: this.getPageTitle('App.workflow', {name: this.workflowName})
+      title: this.getPageTitle('App.workflow', { name: this.workflowName })
     }
   },
   data: () => ({
     deltaSubscriptions: [],
+    deltaTablesSubscriptions: [],
     /**
      * The CylcTree object, which receives delta updates. We must have only one for this
      * view, and it should contain data only while the tree subscription is active (i.e.
@@ -129,33 +131,33 @@ export default {
   }),
   computed: {
     ...mapState('user', ['user']),
-    treeWidgets() {
+    treeWidgets () {
       return Object
-          .entries(this.widgets)
-          .filter(([id, type]) => type === TreeComponent.name)
-          .map(([id, type]) => id)
+        .entries(this.widgets)
+        .filter(([id, type]) => type === TreeComponent.name)
+        .map(([id, type]) => id)
     },
-    tableWidgets() {
+    tableWidgets () {
       return Object
-          .entries(this.widgets)
-          .filter(([id, type]) => type === TableComponent.name)
-          .map(([id, type]) => id)
+        .entries(this.widgets)
+        .filter(([id, type]) => type === TableComponent.name)
+        .map(([id, type]) => id)
     },
-    mutationsWidgets() {
+    mutationsWidgets () {
       return Object
-          .entries(this.widgets)
-          .filter(([id, type]) => type === MutationsView.name)
-          .map(([id, type]) => id)
+        .entries(this.widgets)
+        .filter(([id, type]) => type === MutationsView.name)
+        .map(([id, type]) => id)
     }
   },
-  beforeRouteEnter(to, from, next) {
+  beforeRouteEnter (to, from, next) {
     next(vm => {
       vm.$nextTick(() => {
         vm.addView('tree')
       })
     })
   },
-  beforeRouteUpdate(to, from, next) {
+  beforeRouteUpdate (to, from, next) {
     this.isLoading = true
     // clear the tree with current workflow data
     this.tree.clear()
@@ -173,7 +175,7 @@ export default {
       this.addView('tree')
     })
   },
-  beforeRouteLeave(to, from, next) {
+  beforeRouteLeave (to, from, next) {
     this.$workflowService.stopDeltasSubscription()
     this.tree.clear()
     this.table.clear()
@@ -183,56 +185,56 @@ export default {
     /**
      * @return {number} subscription ID
      */
-    subscribeDeltas() {
+    subscribeDeltas () {
       const id = new Date().getTime()
       // start deltas subscription if not running
       if (this.deltaSubscriptions.length === 0) {
         const vm = this
         this.$workflowService
-            .startDeltasSubscription(WORKFLOW_TREE_DELTAS_SUBSCRIPTION, this.variables, {
-              next: function next(response) {
-                applyDeltas(response.data.deltas, vm.tree)
-                vm.isLoading = false
-              },
-              error: function error(err) {
-                vm.setAlert(new Alert(err.message, null, 'error'))
-                vm.isLoading = false
-              }
-            })
+          .startDeltasSubscription(WORKFLOW_TREE_DELTAS_SUBSCRIPTION, this.variables, {
+            next: function next (response) {
+              applyDeltas(response.data.deltas, vm.tree)
+              vm.isLoading = false
+            },
+            error: function error (err) {
+              vm.setAlert(new Alert(err.message, null, 'error'))
+              vm.isLoading = false
+            }
+          })
       }
       if (this.deltaSubscriptions.length === 0) {
         const vm = this
         this.$workflowService
-            .startDeltasSubscription(WORKFLOW_TREE_DELTAS_SUBSCRIPTION, this.variables, {
-              next: function next(response) {
-                applyDeltas(response.data.deltas, vm.tree)
-                vm.isLoading = false
-              },
-              error: function error(err) {
-                vm.setAlert(new Alert(err.message, null, 'error'))
-                vm.isLoading = false
-              }
-            })
+          .startDeltasSubscription(WORKFLOW_TREE_DELTAS_SUBSCRIPTION, this.variables, {
+            next: function next (response) {
+              applyDeltas(response.data.deltas, vm.tree)
+              vm.isLoading = false
+            },
+            error: function error (err) {
+              vm.setAlert(new Alert(err.message, null, 'error'))
+              vm.isLoading = false
+            }
+          })
       }
       this.deltaSubscriptions.push(id)
       return id
     },
-    subscribeTableDeltas() {
+    subscribeTableDeltas () {
       const id = new Date().getTime()
       // start deltas subscription if not running
       if (this.deltaTableSubscriptions.length === 0) {
         const vm = this
         this.$workflowService
-            .startDeltasSubscription(WORKFLOW_TABLE_DELTAS_SUBSCRIPTION, this.variables, {
-              next: function next(response) {
-                applyTableDeltas(response.data.deltas, vm.table)
-                vm.isLoading = false
-              },
-              error: function error(err) {
-                vm.setAlert(new Alert(err.message, null, 'error'))
-                vm.isLoading = false
-              }
-            })
+          .startDeltasSubscription(WORKFLOW_TABLE_DELTAS_SUBSCRIPTION, this.variables, {
+            next: function next (response) {
+              applyTableDeltas(response.data.deltas, vm.table)
+              vm.isLoading = false
+            },
+            error: function error (err) {
+              vm.setAlert(new Alert(err.message, null, 'error'))
+              vm.isLoading = false
+            }
+          })
       }
       this.deltaTableSubscriptions.push(id)
       return id
@@ -242,7 +244,7 @@ export default {
      *
      * TODO: These views should all have a standard interface.
      */
-    addView(view) {
+    addView (view) {
       if (view === 'tree') {
         const subscriptionId = this.subscribeDeltas()
         Vue.set(this.widgets, subscriptionId, TreeComponent.name)
@@ -258,7 +260,7 @@ export default {
     /**
      * Remove all the widgets present in the UI.
      */
-    removeAllWidgets() {
+    removeAllWidgets () {
       const dockWidgets = this.$refs.lumino.dock.widgets()
       const widgets = []
       each(iter(dockWidgets), widget => {
@@ -279,7 +281,7 @@ export default {
      *   id: string
      * }} event UI event containing the widget ID (string value, needs to be parsed)
      */
-    onWidgetDeletedEvent(event) {
+    onWidgetDeletedEvent (event) {
       Vue.delete(this.widgets, event.id)
       const vm = this
       const subscriptionId = Number.parseFloat(event.id)

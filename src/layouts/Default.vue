@@ -64,7 +64,7 @@ export default {
       workflowViews: [
         'workflow',
         'tree',
-        'table',
+        'table'
       ]
     }
   },
