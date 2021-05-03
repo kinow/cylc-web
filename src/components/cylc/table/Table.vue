@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <!-- Toolbar -->
     <v-row
       no-gutters
-      class="d-flex flex-wrap"
+        class="d-flex flex-wrap"
     >
       <!-- Filters -->
       <v-col
@@ -133,6 +133,49 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </v-col>
     </v-row>
     <!-- Table component -->
+<!--    <div>-->
+<!--      <table style="width:100%">-->
+<!--        <tr style="text-align:left">-->
+<!--          <th>First Name</th>-->
+<!--          <th>Last Name</th>-->
+<!--          <th>Age</th>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--          <td>Steven</td>-->
+<!--          <td>Morrissey</td>-->
+<!--          <td>61</td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--          <td>Johnny</td>-->
+<!--          <td>Marr</td>-->
+<!--          <td>57</td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--          <td>Freddie</td>-->
+<!--          <td>Mercury</td>-->
+<!--          <td>45</td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--          <td>Brian</td>-->
+<!--          <td>May</td>-->
+<!--          <td>73</td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--        <td>Roger</td>-->
+<!--        <td>Taylor</td>-->
+<!--        <td>71</td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--        <td>Carl</td>-->
+<!--        <td>Sagan</td>-->
+<!--        <td>62</td>-->
+<!--        </tr>-->
+<!--      </table>-->
+<!--    </div>-->
+    <div v-for="task of this.displayTable" :key="task.id"></div>
+      <!-- HTML goes here… with some JS/CSS/etc -->
+      <div v-for="workflow of this.workflows"> {{workflow}}
+      </div>
     <v-row
       no-gutters
       >
@@ -162,6 +205,7 @@ import TaskState from '@/model/TaskState.model'
 import Task from '@/components/cylc/Task'
 import clonedeep from 'lodash.clonedeep'
 import { mdiPlus, mdiMinus } from '@mdi/js'
+import {workflows} from "../../../store/workflows.module";
 
 export default {
   name: 'Table',
@@ -183,8 +227,8 @@ export default {
     }
   },
   components: {
-    Task,
-    'table-item': TableItem
+    Task
+    // 'table-item': TableItem
   },
   data () {
     return {
@@ -221,6 +265,9 @@ export default {
       return this.activeFilters.states.map(selectedTaskState => {
         return selectedTaskState
       })
+    },
+    tasks () {
+      return displayTable(this.workflows)
     }
   },
   watch: {
@@ -236,6 +283,17 @@ export default {
     }
   },
   methods: {
+    displayTable () {
+      for (i=0; i<workflows; i++) {
+        if (child.type === 'task-proxy') {
+          workflows.push(i)
+        } else if (child.type != 'task-proxy' && child.children != null) {
+
+        }
+      }
+
+
+    },
     filterByTaskName () {
       return this.activeFilters.name !== undefined &&
           this.activeFilters.name !== null &&
