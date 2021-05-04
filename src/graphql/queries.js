@@ -174,27 +174,27 @@ fragment JobData on Job {
 const WORKFLOW_TABLE_DELTAS_SUBSCRIPTION = gql`
 subscription OnWorkflowDeltasData ($workflowId: ID) {
   deltas (workflows: [$workflowId], stripNull: true) {
-   ...WorkflowTreeDeltas
+   ...WorkflowTableDeltas
   }
 }
 
 # TABLE DELTAS BEGIN
 
-fragment WorkflowTreeDeltas on Deltas {
+fragment WorkflowTableDeltas on Deltas {
   id
   shutdown
   added {
-    ...WorkflowTreeAddedData
+    ...WorkflowTableAddedData
   }
   updated {
-    ...WorkflowTreeUpdatedData
+    ...WorkflowTableUpdatedData
   }
   pruned {
-    ...WorkflowTreePrunedData
+    ...WorkflowTablePrunedData
   }
 }
 
-fragment WorkflowTreeAddedData on Added {
+fragment WorkflowTableAddedData on Added {
   workflow {
     ...WorkflowData
     cyclePoints: familyProxies (ids: ["root"], ghosts: true) {
@@ -224,7 +224,7 @@ fragment WorkflowTreeAddedData on Added {
   }
 }
 
-fragment WorkflowTreeUpdatedData on Updated {
+fragment WorkflowTableUpdatedData on Updated {
   taskProxies (ghosts: true) {
     ...TaskProxyData
   }
@@ -236,7 +236,7 @@ fragment WorkflowTreeUpdatedData on Updated {
   }
 }
 
-fragment WorkflowTreePrunedData on Pruned {
+fragment WorkflowTablePrunedData on Pruned {
   jobs
   taskProxies
   familyProxies
