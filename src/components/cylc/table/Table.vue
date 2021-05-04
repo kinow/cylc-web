@@ -174,8 +174,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <!--    </div>-->
     <div v-for="task of this.displayTable" :key="task.id"></div>
       <!-- HTML goes here… with some JS/CSS/etc -->
-      <div v-for="workflow of this.workflows"> {{workflow}}
-      </div>
+<!--      <div v-for="workflow of this.workflows"> {{ workflow }}-->
+<!--      </div>-->
     <v-row
       no-gutters
       >
@@ -199,13 +199,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 </template>
 
 <script>
-import TableItem from '@/components/cylc/table/TableItem'
+// import TableItem from '@/components/cylc/table/TableItem'
 import Vue from 'vue'
 import TaskState from '@/model/TaskState.model'
 import Task from '@/components/cylc/Task'
 import clonedeep from 'lodash.clonedeep'
 import { mdiPlus, mdiMinus } from '@mdi/js'
-import {workflows} from "../../../store/workflows.module";
+import TableItem from '@/components/cylc/table/TableItem'
+// import { workflows } from "../../../store/workflows.module"
 
 export default {
   name: 'Table',
@@ -227,8 +228,8 @@ export default {
     }
   },
   components: {
-    Task
-    // 'table-item': TableItem
+    Task,
+    TableItem
   },
   data () {
     return {
@@ -265,10 +266,11 @@ export default {
       return this.activeFilters.states.map(selectedTaskState => {
         return selectedTaskState
       })
-    },
-    tasks () {
-      return displayTable(this.workflows)
     }
+    // tasks () {
+    // return displayTable(this.workflows)
+    // }
+    // }
   },
   watch: {
     workflows: {
@@ -284,15 +286,12 @@ export default {
   },
   methods: {
     displayTable () {
-      for (i=0; i<workflows; i++) {
-        if (child.type === 'task-proxy') {
-          workflows.push(i)
-        } else if (child.type != 'task-proxy' && child.children != null) {
-
-        }
-      }
-
-
+      // for (i=0; i<workflows; i++) {
+      //   if (child.type === 'task-proxy') {
+      //     workflows.push(i)
+      //   } else if (child.type != 'task-proxy' && child.children != null) {
+      //   }
+      // }
     },
     filterByTaskName () {
       return this.activeFilters.name !== undefined &&
