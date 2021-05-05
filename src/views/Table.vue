@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <CylcObjectMenu />
     <div class="c-table">
       <table-component
-        :workflows="workflowTable"
+        :tasks="tasks"
         :hoverable="false"
         :activable="false"
         :multiple-active="false"
@@ -35,12 +35,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <script>
 import { mixin } from '@/mixins'
 import { datatable } from '@/mixins/tableview'
-import TableComponent from '@/components/cylc/table/Table.vue'
-import CylcTable from '@/components/cylc/table/cylc-table'
+import TableComponent from '@/components/cylc/table/Table'
 import { WORKFLOW_TABLE_DELTAS_SUBSCRIPTION } from '@/graphql/queries'
 import Alert from '@/model/Alert.model'
-import { applyTableDeltas } from '@/components/cylc/table/deltas'
 import CylcObjectMenu from '@/components/cylc/cylcObject/Menu'
+
+/**
+ * @param {DeltasAdded} data
+ * @param {Array} array
+ */
+const applyTableDeltas = (data, array) => {
+  const added = data.added
+  if (added) {
+    if (added.taskProxies) {
+      for (const taskProxy of added.taskProxies) {
+        array.push(taskProxy)
+      }
+    }
+  }
+}
 
 export default {
   mixins: [
@@ -73,9 +86,9 @@ export default {
      * This is the CylcTable, which contains the hierarchical table data structure.
      * It is created from the GraphQL data, with the only difference that this one
      * contains hierarchy, while the GraphQL is flat-ish.
-     * @type {null|CylcTable}
+     * @type {Array}
      */
-    table: new CylcTable()
+    tasks: []
   }),
 
   /**
@@ -92,7 +105,7 @@ export default {
         .$workflowService
         .startDeltasSubscription(WORKFLOW_TABLE_DELTAS_SUBSCRIPTION, vm.variables, {
           next: function next (response) {
-            applyTableDeltas(response.data.deltas, vm.table)
+            applyTableDeltas(response.data.deltas, vm.tasks)
           },
           error: function error (err) {
             vm.setAlert(new Alert(err.message, null, 'error'))
@@ -108,7 +121,6 @@ export default {
    */
   beforeRouteUpdate (to, from, next) {
     this.$workflowService.stopDeltasSubscription()
-    this.table.clear()
     const vm = this
     // NOTE: this must be done in the nextTick so that vm.variables will use the updated prop!
     this.$nextTick(() => {
@@ -116,7 +128,7 @@ export default {
         .$workflowService
         .startDeltasSubscription(WORKFLOW_TABLE_DELTAS_SUBSCRIPTION, vm.variables, {
           next: function next (response) {
-            applyTableDeltas(response.data.deltas, vm.table)
+            applyTableDeltas(response.data.deltas, vm.tasks)
           },
           error: function error (err) {
             vm.setAlert(new Alert(err.message, null, 'error'))
@@ -132,7 +144,7 @@ export default {
    */
   beforeRouteLeave (to, from, next) {
     this.$workflowService.stopDeltasSubscription()
-    this.table = null
+    this.tasks = []
     next()
   }
 }

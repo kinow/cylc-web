@@ -97,40 +97,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           </v-col>
         </v-row>
       </v-col>
-      <!-- Expand, collapse all -->
-      <v-col
-        v-if="expandCollapseToggle"
-        class="shrink"
-      >
-        <div
-          class="d-flex flex-nowrap"
-        >
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn
-                v-on="on"
-                @click="expandAll((tableitem) => !['task-proxy', 'job', 'job-details'].includes(tableitem.node.type))"
-                icon
-              >
-                <v-icon>{{ svgPaths.expandIcon }}</v-icon>
-              </v-btn>
-            </template>
-            <span>Expand all</span>
-          </v-tooltip>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn
-                v-on="on"
-                @click="collapseAll()"
-                icon
-              >
-                <v-icon>{{ svgPaths.collapseIcon }}</v-icon>
-              </v-btn>
-            </template>
-            <span>Collapse all</span>
-          </v-tooltip>
-        </div>
-      </v-col>
     </v-row>
     <!-- Table component -->
 <!--    <div>-->
@@ -172,46 +138,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <!--        </tr>-->
 <!--      </table>-->
 <!--    </div>-->
-    <div v-for="task of this.displayTable" :key="task.id"></div>
-      <!-- HTML goes here… with some JS/CSS/etc -->
-<!--      <div v-for="workflow of this.workflows"> {{ workflow }}-->
-<!--      </div>-->
-    <v-row
-      no-gutters
+    <table>
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Cyclepoint</th>
+          <th>Batch System</th>
+        </tr>
+      </thead>
+      <tr
+        v-for="task of this.tasks"
+        :key="task.id"
       >
-      <!-- each workflow is a table root -->
-      <table-item
-        v-for="workflow of workflows"
-        :key="workflow.id"
-        :node="workflow"
-        :hoverable="hoverable"
-        :initialExpanded="expanded"
-        v-on:table-item-created="onTableItemCreated"
-        v-on:table-item-destroyed="onTableItemDestroyed"
-        v-on:table-item-expanded="onTableItemExpanded"
-        v-on:table-item-collapsed="onTableItemCollapsed"
-        v-on:table-item-clicked="onTableItemClicked"
-      >
-        <template v-for="(_, slot) of $scopedSlots" v-slot:[slot]="scope"><slot :name="slot" v-bind="scope"/></template>
-      </table-item>
-    </v-row>
+        <!-- HTML goes here… with some JS/CSS/etc -->
+        <td>{{ task.id }}</td>
+        <td>{{ task.id }}</td>
+        <td>{{ task.id }}</td>
+      </tr>
+    </table>
   </v-container>
 </template>
 
 <script>
-// import TableItem from '@/components/cylc/table/TableItem'
-import Vue from 'vue'
 import TaskState from '@/model/TaskState.model'
 import Task from '@/components/cylc/Task'
 import clonedeep from 'lodash.clonedeep'
-import { mdiPlus, mdiMinus } from '@mdi/js'
-import TableItem from '@/components/cylc/table/TableItem'
-// import { workflows } from "../../../store/workflows.module"
 
 export default {
-  name: 'Table',
+  name: 'TableComponent',
   props: {
-    workflows: {
+    tasks: {
       type: Array,
       required: true
     },
@@ -221,34 +177,19 @@ export default {
     filterable: {
       type: Boolean,
       default: true
-    },
-    expandCollapseToggle: {
-      type: Boolean,
-      default: true
     }
   },
   components: {
-    Task,
-    TableItem
+    Task
   },
   data () {
     return {
-      tableItemCache: {},
-      activeCache: new Set(),
-      expandedCache: new Set(),
-      expanded: true,
-      expandedFilter: null,
-      collapseFilter: null,
       tasksFilter: {
         name: '',
         states: []
       },
       activeFilters: null,
-      maximumTasks: 4,
-      svgPaths: {
-        expandIcon: mdiPlus,
-        collapseIcon: mdiMinus
-      }
+      maximumTasks: 4
     }
   },
   computed: {
@@ -267,32 +208,8 @@ export default {
         return selectedTaskState
       })
     }
-    // tasks () {
-    // return displayTable(this.workflows)
-    // }
-    // }
-  },
-  watch: {
-    workflows: {
-      deep: true,
-      handler: function (val, oldVal) {
-        if (this.activeFilters !== null) {
-          this.$nextTick(() => {
-            this.filterNodes(this.workflows)
-          })
-        }
-      }
-    }
   },
   methods: {
-    displayTable () {
-      // for (i=0; i<workflows; i++) {
-      //   if (child.type === 'task-proxy') {
-      //     workflows.push(i)
-      //   } else if (child.type != 'task-proxy' && child.children != null) {
-      //   }
-      // }
-    },
     filterByTaskName () {
       return this.activeFilters.name !== undefined &&
           this.activeFilters.name !== null &&
@@ -344,62 +261,6 @@ export default {
     removeAllFilters () {
       for (const tableitem of Object.values(this.tableItemCache)) {
         tableitem.filtered = true
-      }
-    },
-    expandAll (filter = null) {
-      const collection = filter ? [...Object.values(this.tableItemCache)].filter(filter) : Object.values(this.tableItemCache)
-      for (const tableItem of collection) {
-        tableItem.isExpanded = true
-        this.expandedCache.add(tableItem)
-      }
-      this.expanded = true
-    },
-    collapseAll (filter = null) {
-      const collection = filter ? [...this.expandedCache].filter(filter) : this.expandedCache
-      for (const tableItem of collection) {
-        tableItem.isExpanded = false
-        this.expandedCache.delete(tableItem)
-      }
-      if (!filter) {
-        this.expanded = false
-      }
-    },
-    onTableItemExpanded (tableItem) {
-      this.expandedCache.add(tableItem)
-      this.expanded = true
-    },
-    onTableItemCollapsed (tableItem) {
-      this.expandedCache.delete(tableItem)
-    },
-    onTableItemCreated (tableItem) {
-      Vue.set(this.tableItemCache, tableItem.$props.node.id, tableItem)
-      if (tableItem.isExpanded) {
-        this.expandedCache.add(tableItem)
-      }
-    },
-    onTableItemDestroyed (tableItem) {
-      // make sure the item is removed from all caches, otherwise we will have a memory leak
-      Vue.delete(this.tableItemCache, tableItem.$props.node.id)
-      this.expandedCache.delete(tableItem)
-      this.activeCache.delete(tableItem)
-    },
-    onTableItemClicked (tableItem) {
-      if (this.activable) {
-        if (!this.multipleActive) {
-          // only one item can be active, so make sure everything else that was active is now !active
-          for (const cached of this.activeCache) {
-            if (cached !== tableItem) {
-              cached.active = false
-            }
-          }
-          // empty cache
-          this.activeCache.clear()
-        }
-
-        tableItem.active = !tableItem.active
-        if (tableItem.active) {
-          this.activeCache.add(tableItem)
-        }
       }
     }
   }
