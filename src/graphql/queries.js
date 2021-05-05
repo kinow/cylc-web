@@ -172,13 +172,11 @@ fragment JobData on Job {
 # WORKFLOW DATA END
 `
 const WORKFLOW_TABLE_DELTAS_SUBSCRIPTION = gql`
-subscription OnWorkflowDeltasData ($workflowId: ID) {
-  deltas (workflows: [$workflowId], stripNull: true) {
-   ...WorkflowTableDeltas
+subscription OnWorkflowDeltasData($workflowId: ID) {
+  deltas(workflows: [$workflowId], stripNull: true) {
+    ...WorkflowTableDeltas
   }
 }
-
-# TABLE DELTAS BEGIN
 
 fragment WorkflowTableDeltas on Deltas {
   id
@@ -197,54 +195,34 @@ fragment WorkflowTableDeltas on Deltas {
 fragment WorkflowTableAddedData on Added {
   workflow {
     ...WorkflowData
-    cyclePoints: familyProxies (ids: ["root"], ghosts: true) {
-      ...CyclePointData
-    }
-    taskProxies (sort: { keys: ["name"], reverse: false }, ghosts: true) {
+    taskProxies(sort: {keys: ["name"], reverse: false}, ghosts: true) {
       ...TaskProxyData
-      jobs(sort: { keys: ["submit_num"], reverse:true }) {
+      jobs(sort: {keys: ["submit_num"], reverse: true}) {
         ...JobData
       }
     }
-    familyProxies (exids: ["root"], sort: { keys: ["name"] }, ghosts: true) {
-      ...FamilyProxyData
-    }
   }
-  cyclePoints: familyProxies (ids: ["root"], ghosts: true) {
-    ...CyclePointData
-  }
-  familyProxies (exids: ["root"], sort: { keys: ["name"] }, ghosts: true) {
-    ...FamilyProxyData
-  }
-  taskProxies (sort: { keys: ["name"], reverse: false }, ghosts: true) {
+  taskProxies(sort: {keys: ["name"], reverse: false}, ghosts: true) {
     ...TaskProxyData
   }
-  jobs (sort: { keys: ["submit_num"], reverse:true }) {
+  jobs(sort: {keys: ["submit_num"], reverse: true}) {
     ...JobData
   }
 }
 
 fragment WorkflowTableUpdatedData on Updated {
-  taskProxies (ghosts: true) {
+  taskProxies(ghosts: true) {
     ...TaskProxyData
   }
   jobs {
     ...JobData
-  }
-  familyProxies (exids: ["root"], ghosts: true) {
-    ...FamilyProxyData
   }
 }
 
 fragment WorkflowTablePrunedData on Pruned {
   jobs
   taskProxies
-  familyProxies
 }
-
-# TABLE DELTAS END
-
-# WORKFLOW DATA BEGIN
 
 fragment WorkflowData on Workflow {
   id
@@ -253,24 +231,6 @@ fragment WorkflowData on Workflow {
   owner
   host
   port
-}
-
-fragment CyclePointData on FamilyProxy {
-  id
-  cyclePoint
-}
-
-fragment FamilyProxyData on FamilyProxy {
-  id
-  name
-  state
-  cyclePoint
-  firstParent {
-    id
-    name
-    cyclePoint
-    state
-  }
 }
 
 fragment TaskProxyData on TaskProxy {
@@ -306,13 +266,12 @@ fragment JobData on Job {
   state
   submitNum
   taskProxy {
-    outputs (satisfied: true, sort: { keys: ["time"], reverse: true}) {
+    outputs(satisfied: true, sort: {keys: ["time"], reverse: true}) {
       label
       message
     }
   }
 }
-
 # WORKFLOW DATA END
 `
 /**
