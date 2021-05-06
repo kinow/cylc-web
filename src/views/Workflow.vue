@@ -47,9 +47,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             type="list-item-three-line"
             tab-title="table"
         >
-          <table-component
-              :workflows="table.root.children"
-          />
+        <!-- <table-component-->
+        <!--    :workflows="table.root.children"-->
+        <!--  />-->
         </v-skeleton-loader>
         <mutations-view
           v-for="widgetId of mutationsWidgets"
@@ -69,11 +69,9 @@ import { datatree } from '@/mixins/treeview'
 import { datatable } from '@/mixins/tableview'
 import { mapState } from 'vuex'
 import Lumino from '@/components/cylc/workflow/Lumino'
-import { WORKFLOW_TREE_DELTAS_SUBSCRIPTION, WORKFLOW_TABLE_DELTAS_SUBSCRIPTION } from '@/graphql/queries'
+import { WORKFLOW_TREE_DELTAS_SUBSCRIPTION } from '@/graphql/queries'
 import CylcTree from '@/components/cylc/tree/cylc-tree'
-import CylcTable from '@/components/cylc/table/cylc-table'
 import { applyDeltas } from '@/components/cylc/tree/deltas'
-import { applyTableDeltas } from '@/components/cylc/table/deltas'
 import Alert from '@/model/Alert.model'
 import { each, iter } from '@lumino/algorithm'
 import TreeComponent from '@/components/cylc/tree/Tree.vue'
@@ -100,7 +98,6 @@ export default {
     CylcObjectMenu,
     Lumino,
     TreeComponent,
-    TableComponent,
     MutationsView,
     Toolbar
   },
@@ -120,7 +117,6 @@ export default {
      * @type {CylcTree}
      */
     tree: new CylcTree(),
-    table: new CylcTable(),
     isLoading: true,
     // the widgets added to the view
     /**
@@ -218,26 +214,6 @@ export default {
           })
       }
       this.deltaSubscriptions.push(id)
-      return id
-    },
-    subscribeTableDeltas () {
-      const id = new Date().getTime()
-      // start deltas subscription if not running
-      if (this.deltaTableSubscriptions.length === 0) {
-        const vm = this
-        this.$workflowService
-          .startDeltasSubscription(WORKFLOW_TABLE_DELTAS_SUBSCRIPTION, this.variables, {
-            next: function next (response) {
-              applyTableDeltas(response.data.deltas, vm.table)
-              vm.isLoading = false
-            },
-            error: function error (err) {
-              vm.setAlert(new Alert(err.message, null, 'error'))
-              vm.isLoading = false
-            }
-          })
-      }
-      this.deltaTableSubscriptions.push(id)
       return id
     },
     /**
