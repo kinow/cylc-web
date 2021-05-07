@@ -98,52 +98,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </v-row>
       </v-col>
     </v-row>
-    <!-- Table component -->
-<!--    <div>-->
-<!--      <table style="width:100%">-->
-<!--        <tr style="text-align:left">-->
-<!--          <th>First Name</th>-->
-<!--          <th>Last Name</th>-->
-<!--          <th>Age</th>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--          <td>Steven</td>-->
-<!--          <td>Morrissey</td>-->
-<!--          <td>61</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--          <td>Johnny</td>-->
-<!--          <td>Marr</td>-->
-<!--          <td>57</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--          <td>Freddie</td>-->
-<!--          <td>Mercury</td>-->
-<!--          <td>45</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--          <td>Brian</td>-->
-<!--          <td>May</td>-->
-<!--          <td>73</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--        <td>Roger</td>-->
-<!--        <td>Taylor</td>-->
-<!--        <td>71</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--        <td>Carl</td>-->
-<!--        <td>Sagan</td>-->
-<!--        <td>62</td>-->
-<!--        </tr>-->
-<!--      </table>-->
-<!--    </div>-->
-    <table>
+    <table layout="auto" width="100%">
       <thead>
-      <tr>
+      <tr align="left">
         <th>Task</th>
+        <th>State</th>
         <th>Cyclepoint</th>
-        <th>Batch System</th>
+        <th>Host</th>
+        <th>Job System</th>
+        <th>Job ID</th>
+        <th>T-submit</th>
+        <th>T-start</th>
+        <th>T-finish</th>
+        <th>dT-mean</th>
       </tr>
       </thead>
       <tr
@@ -152,8 +119,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           >
         <!-- HTML goes here… with some JS/CSS/etc -->
         <td>{{ task.id }}</td>
-        <td>{{ task.id }}</td>
-        <td>{{ task.id }}</td>
+        <td>{{ task.state }}</td>
+        <td>{{ task.cyclePoint }}</td>
+        <td>{{ getTaskJobProps(task, 'platform') }}</td>
+        <td>{{ getTaskJobProps(task, 'jobRunnerName') }}</td>
+        <td>{{ getTaskJobProps(task, 'jobId') }}</td>
+        <td>{{ getTaskJobProps(task, 'submittedTime') }}</td>
+        <td>{{ getTaskJobProps(task, 'startedTime') }}</td>
+        <td>{{ getTaskJobProps(task, 'finishedTime') }}</td>
+        <td>{{ task.meanElapsedTime }}</td>
       </tr>
     </table>
   </v-container>
@@ -210,6 +184,12 @@ export default {
     }
   },
   methods: {
+    getTaskJobProps (task, property) {
+      if (task.jobs && task.jobs.length > 0) {
+        return task.jobs[0][property]
+      }
+      return ''
+    },
     filterByTaskName () {
       return this.activeFilters.name !== undefined &&
           this.activeFilters.name !== null &&
