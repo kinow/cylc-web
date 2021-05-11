@@ -117,7 +117,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           v-for="task of this.tasks"
           :key="task.id"
           >
-        <!-- HTML goes here… with some JS/CSS/etc -->
         <td>{{ task.id }}</td>
         <td>{{ task.state }}</td>
         <td>{{ task.cyclePoint }}</td>

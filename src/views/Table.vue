@@ -46,15 +46,25 @@ import CylcObjectMenu from '@/components/cylc/cylcObject/Menu'
 */
 const applyTableDeltas = (data, array) => {
   const added = data.added
+  const pruned = data.pruned
   if (added) {
     if (added.taskProxies) {
       for (const taskProxy of added.taskProxies) {
         array.push(taskProxy)
       }
     }
+  } else if (pruned) {
+    if (pruned.taskProxies) {
+      for (const taskProxy of pruned.taskProxy) {
+        array.splice(taskProxy)
+      }
+    }
   }
 }
-
+removeTaskProxy (indexToRemove) {
+  indexToRemove = this.tasks.findIndex(task => task.id === taskIdPrunedFromDeltas)
+  this.tasks.splice(indexToRemove)
+}
 export default {
   mixins: [
     mixin,
