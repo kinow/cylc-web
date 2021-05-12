@@ -98,7 +98,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </v-row>
       </v-col>
     </v-row>
-    <table layout="auto" width="100%">
+    <table layout="auto" width="100%" padding="1px" border="1px solid black">
       <thead>
       <tr align="left">
         <th>Task</th>

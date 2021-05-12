@@ -53,17 +53,14 @@ const applyTableDeltas = (data, array) => {
         array.push(taskProxy)
       }
     }
-  } else if (pruned) {
+  } if (pruned) {
     if (pruned.taskProxies) {
-      for (const taskProxy of pruned.taskProxy) {
-        array.splice(taskProxy)
+      for (const taskProxy of pruned.taskProxies) {
+        const indexToRemove = array.findIndex(task => task.id === taskProxy)
+        array.splice(indexToRemove, 1)
       }
     }
   }
-}
-removeTaskProxy (indexToRemove) {
-  indexToRemove = this.tasks.findIndex(task => task.id === taskIdPrunedFromDeltas)
-  this.tasks.splice(indexToRemove)
 }
 export default {
   mixins: [
