@@ -39,6 +39,7 @@ import TableComponent from '@/components/cylc/table/Table'
 import { WORKFLOW_TABLE_DELTAS_SUBSCRIPTION } from '@/graphql/queries'
 import Alert from '@/model/Alert.model'
 import CylcObjectMenu from '@/components/cylc/cylcObject/Menu'
+import { mergeWith } from 'lodash'
 
 /**
 * @param {DeltasAdded} data
@@ -62,6 +63,7 @@ const applyTableDeltas = (data, array) => {
     }
   }
 }
+
 export default {
   mixins: [
     mixin,
