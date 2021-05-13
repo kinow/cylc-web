@@ -60,7 +60,7 @@ const applyTableDeltas = (data, array) => {
   if (pruned) {
     if (pruned.taskProxies) {
       for (const taskProxy of pruned.taskProxies) {
-        const indexToRemove = array.findIndex(task => task.id === taskProxy)
+        const indexToRemove = array.findIndex(task => task.id === taskProxy.id)
         array.splice(indexToRemove, 1)
       }
     }
