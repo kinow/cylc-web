@@ -40,6 +40,7 @@ import { WORKFLOW_TABLE_DELTAS_SUBSCRIPTION } from '@/graphql/queries'
 import Alert from '@/model/Alert.model'
 import CylcObjectMenu from '@/components/cylc/cylcObject/Menu'
 import { mergeWith } from 'lodash'
+import Vue from 'vue'
 
 /**
 * @param {DeltasAdded} data
@@ -67,9 +68,26 @@ const applyTableDeltas = (data, array) => {
   if (updated) {
     if (updated.taskProxies) {
       for (const taskProxy of updated.taskProxies) {
-        const indexToUpdate = array.findIndex(task => task.id === taskProxy)
-        mergeWith(updated, indexToUpdate)
+        // const indexToUpdate = array.findIndex(task => task.id === taskProxy)
+        const existingTask = array.find(task => task.id === taskProxy.id)
+        mergeWith(existingTask, taskProxy, mergeWithCustomizer)
       }
+    }
+  }
+}
+function mergeWithCustomizer (objValue, srcValue, key, object, source) {
+  if (srcValue !== undefined) {
+    // 1. object[key], or objValue, is undefined
+    //    meaning the destination object does not have the property
+    //    so let's add it with reactivity!
+    if (objValue === undefined) {
+      Vue.set(object, `${key}`, srcValue)
+    }
+    // 2. object[key], or objValue, is defined but without reactivity
+    //    this means somehow the object got a new property that is not reactive
+    //    so let's now make it reactive with the new value!
+    if (object[key] && !object[key].__ob__) {
+      Vue.set(object, `${key}`, srcValue)
     }
   }
 }
