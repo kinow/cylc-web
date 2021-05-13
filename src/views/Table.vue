@@ -48,13 +48,15 @@ import { mergeWith } from 'lodash'
 const applyTableDeltas = (data, array) => {
   const added = data.added
   const pruned = data.pruned
+  const updated = data.updated
   if (added) {
     if (added.taskProxies) {
       for (const taskProxy of added.taskProxies) {
         array.push(taskProxy)
       }
     }
-  } if (pruned) {
+  }
+  if (pruned) {
     if (pruned.taskProxies) {
       for (const taskProxy of pruned.taskProxies) {
         const indexToRemove = array.findIndex(task => task.id === taskProxy)
@@ -62,8 +64,15 @@ const applyTableDeltas = (data, array) => {
       }
     }
   }
+  if (updated) {
+    if (updated.taskProxies) {
+      for (const taskProxy of updated.taskProxies) {
+        const indexToUpdate = array.findIndex(task => task.id === taskProxy)
+        mergeWith(updated, indexToUpdate)
+      }
+    }
+  }
 }
-
 export default {
   mixins: [
     mixin,
