@@ -47,9 +47,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             type="list-item-three-line"
             tab-title="table"
         >
-        <!-- <table-component-->
-        <!--    :workflows="table.root.children"-->
-        <!--  />-->
         </v-skeleton-loader>
         <mutations-view
           v-for="widgetId of mutationsWidgets"

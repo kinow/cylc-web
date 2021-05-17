@@ -101,9 +101,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <table layout="auto" width="100%" padding="1px" border="1px solid black">
       <thead>
       <tr align="left">
+<!--        <th>Test</th>-->
         <th>Task</th>
-        <th>State</th>
         <th>Cyclepoint</th>
+        <th>State</th>
         <th>Host</th>
         <th>Job System</th>
         <th>Job ID</th>
@@ -117,9 +118,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           v-for="task of this.tasks"
           :key="task.id"
           >
-        <td>{{ task.id }}</td>
-        <td>{{ task.state }}</td>
+<!--    <td><Task :status="taskProxy.state" /></td>-->
+        <td>{{getTaskProxyJobProps(task, 'isHeld')}} {{ task.name }}</td>
         <td>{{ task.cyclePoint }}</td>
+        <td>{{ task.state }}</td>
         <td>{{ getTaskJobProps(task, 'platform') }}</td>
         <td>{{ getTaskJobProps(task, 'jobRunnerName') }}</td>
         <td>{{ getTaskJobProps(task, 'jobId') }}</td>
@@ -135,6 +137,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <script>
 import TaskState from '@/model/TaskState.model'
 import Task from '@/components/cylc/Task'
+// import Job from '@/components/cylc/Job'
 import clonedeep from 'lodash.clonedeep'
 
 export default {
@@ -144,9 +147,6 @@ export default {
       type: Array,
       required: true
     },
-    hoverable: Boolean,
-    activable: Boolean,
-    multipleActive: Boolean,
     filterable: {
       type: Boolean,
       default: true
@@ -154,6 +154,7 @@ export default {
   },
   components: {
     Task
+    // Job
   },
   data () {
     return {
@@ -186,6 +187,12 @@ export default {
     getTaskJobProps (task, property) {
       if (task.jobs && task.jobs.length > 0) {
         return task.jobs[0][property]
+      }
+      return ''
+    },
+    getTaskProxyJobProps (taskProxy, property) {
+      if (taskProxy.jobs && taskProxy.jobs.length > 0) {
+        return taskProxy.jobs[0][property]
       }
       return ''
     },
