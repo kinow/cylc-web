@@ -118,8 +118,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           v-for="task of this.tasks"
           :key="task.id"
           >
-<!--    <td><Task :status="taskProxy.state" /></td>-->
-        <td>{{getTaskProxyJobProps(task, 'isHeld')}} {{ task.name }}</td>
+        <td><Task :status="task.state" />{{ task.name }}</td>
         <td>{{ task.cyclePoint }}</td>
         <td>{{ task.state }}</td>
         <td>{{ getTaskJobProps(task, 'platform') }}</td>
