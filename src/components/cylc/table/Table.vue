@@ -118,7 +118,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           v-for="task of this.tasks"
           :key="task.id"
           >
-        <td><Task :status="task.state" />{{ task.name }}</td>
+        <td><div style="white-space: nowrap"><Task :status="task.state" />  <Job :status="getTaskJobProps(task, 'state')" /> {{ task.name }}</div></td>
+
         <td>{{ task.cyclePoint }}</td>
         <td>{{ task.state }}</td>
         <td>{{ getTaskJobProps(task, 'platform') }}</td>
@@ -136,7 +137,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <script>
 import TaskState from '@/model/TaskState.model'
 import Task from '@/components/cylc/Task'
-// import Job from '@/components/cylc/Job'
+import Job from '@/components/cylc/Job'
 import clonedeep from 'lodash.clonedeep'
 
 export default {
@@ -152,8 +153,8 @@ export default {
     }
   },
   components: {
-    Task
-    // Job
+    Task,
+    Job
   },
   data () {
     return {
