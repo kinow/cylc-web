@@ -43,7 +43,7 @@ import Vue from 'vue'
 * @param {DeltasAdded} data
 * @param {Array} array
 */
-const applyTableDeltas = (data, array) => {
+export const applyTableDeltas = (data, array) => {
   const added = data.added
   const pruned = data.pruned
   const updated = data.updated

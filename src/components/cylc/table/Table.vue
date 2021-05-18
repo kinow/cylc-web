@@ -104,7 +104,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <!--        <th>Test</th>-->
         <th>Task</th>
         <th>Cyclepoint</th>
-        <th>State</th>
         <th>Host</th>
         <th>Job System</th>
         <th>Job ID</th>
@@ -119,9 +118,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           :key="task.id"
           >
         <td><div style="white-space: nowrap"><Task :status="task.state" />  <Job :status="getTaskJobProps(task, 'state')" /> {{ task.name }}</div></td>
-
         <td>{{ task.cyclePoint }}</td>
-        <td>{{ task.state }}</td>
         <td>{{ getTaskJobProps(task, 'platform') }}</td>
         <td>{{ getTaskJobProps(task, 'jobRunnerName') }}</td>
         <td>{{ getTaskJobProps(task, 'jobId') }}</td>
