@@ -100,8 +100,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </v-row>
     <v-data-table
         :headers="headers"
-        :slot="item"
-        :slot-scope="{ item }"
+        :items="tasks"
     >
       <template
         slot="headerCell"
@@ -112,24 +111,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             v-text="header.text"
           />
       </template>
-      <thead>
-      <tr align="left">
-      </tr>
-      </thead>
-      <tr
-          v-for="task of this.tasks"
-          :key="task.id"
-          >
-        <td><div style="white-space: nowrap"><Task :status="task.state" />  <Job :status="getTaskJobProps(task, 'state')" /> {{ task.name }}</div></td>
-        <td>{{ task.cyclePoint }}</td>
-        <td>{{ getTaskJobProps(task, 'platform') }}</td>
-        <td>{{ getTaskJobProps(task, 'jobRunnerName') }}</td>
-        <td>{{ getTaskJobProps(task, 'jobId') }}</td>
-        <td>{{ getTaskJobProps(task, 'submittedTime') }}</td>
-        <td>{{ getTaskJobProps(task, 'startedTime') }}</td>
-        <td>{{ getTaskJobProps(task, 'finishedTime') }}</td>
-        <td>{{ task.meanElapsedTime }}</td>
-      </tr>
+      <template
+          slot="item"
+          slot-scope="{ item }"
+        >
+        <tr
+            v-for="item of this.items"
+            :key="item.id"
+        >
+          <td><div style="white-space: nowrap"><Task :status="item.state" />  <Job :status="getTaskJobProps(item, 'state')" /> {{ item.name }}</div></td>
+          <td>{{ item.cyclePoint }}</td>
+          <td>{{ getTaskJobProps(item, 'platform') }}</td>
+          <td>{{ getTaskJobProps(item, 'jobRunnerName') }}</td>
+          <td>{{ getTaskJobProps(item, 'jobId') }}</td>
+          <td>{{ getTaskJobProps(item, 'submittedTime') }}</td>
+          <td>{{ getTaskJobProps(item, 'startedTime') }}</td>
+          <td>{{ getTaskJobProps(item, 'finishedTime') }}</td>
+          <td>{{ item.meanElapsedTime }}</td>
+        </tr>
+      </template>
     </v-data-table>
   </v-container>
 </template>
