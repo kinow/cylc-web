@@ -98,19 +98,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </v-row>
       </v-col>
     </v-row>
-    <table layout="auto" width="100%" padding="1px" border="1px solid black">
+    <v-data-table
+        :headers="headers"
+        :slot="item"
+        :slot-scope="{ item }"
+    >
+      <template
+        slot="headerCell"
+        slot-scope="{ header }"
+      >
+        <span
+            class="subheading font-weight-light text-success text--darken-3"
+            v-text="header.text"
+          />
+      </template>
       <thead>
       <tr align="left">
-<!--        <th>Test</th>-->
-        <th>Task</th>
-        <th>Cyclepoint</th>
-        <th>Host</th>
-        <th>Job System</th>
-        <th>Job ID</th>
-        <th>T-submit</th>
-        <th>T-start</th>
-        <th>T-finish</th>
-        <th>dT-mean</th>
       </tr>
       </thead>
       <tr
@@ -127,7 +130,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <td>{{ getTaskJobProps(task, 'finishedTime') }}</td>
         <td>{{ task.meanElapsedTime }}</td>
       </tr>
-    </table>
+    </v-data-table>
   </v-container>
 </template>
 
@@ -155,6 +158,35 @@ export default {
   },
   data () {
     return {
+      headers: [
+        {
+          text: 'Task'
+        },
+        {
+          text: 'Cycle Point'
+        },
+        {
+          text: 'Host'
+        },
+        {
+          text: 'Job System'
+        },
+        {
+          text: 'Job ID'
+        },
+        {
+          text: 'T-submit'
+        },
+        {
+          text: 'T-start'
+        },
+        {
+          text: 'T-finish'
+        },
+        {
+          text: 'dT-mean'
+        }
+      ],
       tasksFilter: {
         name: '',
         states: []
