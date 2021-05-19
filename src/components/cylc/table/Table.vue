@@ -115,10 +115,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           slot="item"
           slot-scope="{ item }"
         >
-        <tr
-            v-for="item of this.items"
-            :key="item.id"
-        >
+        <tr>
           <td><div style="white-space: nowrap"><Task :status="item.state" />  <Job :status="getTaskJobProps(item, 'state')" /> {{ item.name }}</div></td>
           <td>{{ item.cyclePoint }}</td>
           <td>{{ getTaskJobProps(item, 'platform') }}</td>
