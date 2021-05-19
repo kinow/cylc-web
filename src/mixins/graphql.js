@@ -15,11 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { mapActions, mapState } from 'vuex'
-/* eslint-disable no-unused-vars */
-import User from '@/model/User.model'
+import { mapState } from 'vuex'
 
-const datatable = {
+/**
+ * A mixin for GraphQL, including the computed variables used in queries.
+ */
+export default {
   computed: {
     /**
      * We use the user from the store to compute the workflow ID. The view
@@ -46,16 +47,5 @@ const datatable = {
         workflowId: this.workflowId
       }
     }
-  },
-
-  methods: {
-    /**
-     * Create a UI alert.
-     */
-    ...mapActions(['setAlert'])
   }
-}
-
-export {
-  datatable
 }

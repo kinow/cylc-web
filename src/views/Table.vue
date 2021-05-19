@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <div class="c-table">
       <table-component
         :tasks="tasks"
-       props :min-depth="1"
         ref="table0"
         key="table0"
       ></table-component>
@@ -30,8 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 </template>
 
 <script>
-import { mixin } from '@/mixins'
-import { datatable } from '@/mixins/tableview'
+import mixin from '@/mixins'
+import graphqlMixin from '@/mixins/graphql'
 import TableComponent from '@/components/cylc/table/Table'
 import { WORKFLOW_TABLE_DELTAS_SUBSCRIPTION } from '@/graphql/queries'
 import Alert from '@/model/Alert.model'
@@ -84,7 +83,7 @@ function mergeWithCustomizer (objValue, srcValue, key, object, source) {
 export default {
   mixins: [
     mixin,
-    datatable
+    graphqlMixin
   ],
 
   name: 'Table',

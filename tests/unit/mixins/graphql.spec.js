@@ -16,46 +16,33 @@
  */
 
 import { expect } from 'chai'
-import treeViewMixin from '@/mixins/treeview'
+import graphqlMixin from '@/mixins/graphql'
 import { shallowMount } from '@vue/test-utils'
 import store from '@/store'
 
-describe('Treeview mixin', () => {
+describe('GraphQL mixin', () => {
   const mountFunction = options => {
     return shallowMount({
-      mixins: [treeViewMixin],
+      mixins: [graphqlMixin],
       render () {},
       store,
       ...options
     })
   }
-  it('should return the workflow tree provided', () => {
-    let component = mountFunction({
+  it('should compute the workflow ID and GraphQL variables', () => {
+    const username = 'cylc'
+    const workflow = 'test'
+    store.state.user.user = {
+      username: 'cylc'
+    }
+    const component = mountFunction({
       data () {
         return {
-          tree: null
+          workflowName: workflow
         }
       }
     })
-    expect(component.vm.workflowTree).to.deep.equal([])
-
-    const children = [
-      {
-        id: 1
-      }
-    ]
-
-    component = mountFunction({
-      data () {
-        return {
-          tree: {
-            root: {
-              children
-            }
-          }
-        }
-      }
-    })
-    expect(component.vm.workflowTree).to.deep.equal(children)
+    expect(component.vm.workflowId).to.equal(`${username}|${workflow}`)
+    expect(component.vm.variables).to.deep.equal({ workflowId: `${username}|${workflow}` })
   })
 })

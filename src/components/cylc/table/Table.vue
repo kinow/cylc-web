@@ -99,22 +99,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </v-col>
     </v-row>
     <v-data-table
-        :headers="headers"
-        :items="tasks"
+      :headers="headers"
+      :items="tasks"
     >
       <template
         slot="headerCell"
         slot-scope="{ header }"
       >
         <span
-            class="subheading font-weight-light text-success text--darken-3"
-            v-text="header.text"
-          />
+          class="subheading font-weight-light text-success text--darken-3"
+          v-text="header.text"
+        />
       </template>
       <template
-          slot="item"
-          slot-scope="{ item }"
-        >
+        slot="item"
+        slot-scope="{ item }"
+      >
         <tr>
           <td><div style="white-space: nowrap"><Task v-cylc-object="item.id" :status="item.state" />  <Job :status="getTaskJobProps(item, 'state')" /> {{ item.name }}</div></td>
           <td>{{ item.cyclePoint }}</td>

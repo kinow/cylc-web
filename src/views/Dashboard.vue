@@ -165,7 +165,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 </template>
 
 <script>
-import { mixin } from '@/mixins/index'
+import mixin from '@/mixins/index'
 import { mapState } from 'vuex'
 import { getHubUrl } from '@/utils/user'
 import { DASHBOARD_QUERY } from '@/graphql/queries'

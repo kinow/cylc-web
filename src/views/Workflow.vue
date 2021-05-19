@@ -64,8 +64,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 </template>
 
 <script>
-import { mixin } from '@/mixins'
-import { datatree } from '@/mixins/treeview'
+import mixin from '@/mixins'
+import graphqlMixin from '@/mixins/graphql'
+import treeViewMixin from '@/mixins/treeview'
 import { mapState } from 'vuex'
 import Lumino from '@/components/cylc/workflow/Lumino'
 import { WORKFLOW_TREE_DELTAS_SUBSCRIPTION, WORKFLOW_TABLE_DELTAS_SUBSCRIPTION } from '@/graphql/queries'
@@ -84,7 +85,8 @@ import CylcObjectMenu from '@/components/cylc/cylcObject/Menu'
 export default {
   mixins: [
     mixin,
-    datatree
+    graphqlMixin,
+    treeViewMixin
   ],
   name: 'Workflow',
   props: {
