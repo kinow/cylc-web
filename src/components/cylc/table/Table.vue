@@ -116,7 +116,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           slot-scope="{ item }"
         >
         <tr>
-          <td><div style="white-space: nowrap"><Task :status="item.state" />  <Job :status="getTaskJobProps(item, 'state')" /> {{ item.name }}</div></td>
+          <td><div style="white-space: nowrap"><Task v-cylc-object="item.id" :status="item.state" />  <Job :status="getTaskJobProps(item, 'state')" /> {{ item.name }}</div></td>
           <td>{{ item.cyclePoint }}</td>
           <td>{{ getTaskJobProps(item, 'platform') }}</td>
           <td>{{ getTaskJobProps(item, 'jobRunnerName') }}</td>
