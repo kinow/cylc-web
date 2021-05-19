@@ -33,8 +33,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 </template>
 
 <script>
-import { mixin } from '@/mixins'
-import { datatree } from '@/mixins/treeview'
+import mixin from '@/mixins'
+import alertsMixin from '@/mixins/alerts'
+import treeViewMixin from '@/mixins/treeview'
+import graphqlMixin from '@/mixins/graphql'
 import TreeComponent from '@/components/cylc/tree/Tree.vue'
 import CylcTree from '@/components/cylc/tree/cylc-tree'
 import { WORKFLOW_TREE_DELTAS_SUBSCRIPTION } from '@/graphql/queries'
@@ -44,8 +46,10 @@ import CylcObjectMenu from '@/components/cylc/cylcObject/Menu'
 
 export default {
   mixins: [
+    alertsMixin,
     mixin,
-    datatree
+    graphqlMixin,
+    treeViewMixin
   ],
 
   name: 'Tree',

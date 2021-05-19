@@ -15,27 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import i18n from '@/i18n'
+import { mapActions, mapState } from 'vuex'
+/* eslint-disable no-unused-vars */
+import User from '@/model/User.model'
 
 /**
- * Here we can define the operations that are common to components/views.
- * @type {{methods: {setPageTitle(*=, *=): string}}}
+ * A mixin for application alerts.
  */
-
 export default {
-  /**
-   * Automatically created methods for components.
-   */
+  computed: {
+    /**
+     * We use the user from the store to compute the workflow ID. The view
+     * has only the workflow name from the Vue route. We then combine it
+     * with the user name and the default divider '|' to create the workflow
+     * ID.
+     * @return {User}
+     */
+    ...mapState('user', ['user'])
+  },
   methods: {
     /**
-     * i18n-enabled operation, to get the title respecting the locale used
-     * in the application settings.
-     * @param key {string} i18n key
-     * @param params {object} optional object key=value used in the i18n message
-     * @returns {string}
+     * Create a UI alert.
      */
-    getPageTitle: function (key, params = {}) {
-      return `${i18n.t('App.name')} | ${i18n.t(key, params)}`
-    }
+    ...mapActions(['setAlert'])
   }
 }

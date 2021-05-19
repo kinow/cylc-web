@@ -16,7 +16,7 @@
  */
 
 import { expect } from 'chai'
-import { mixin } from '@/mixins/index'
+import mixin from '@/mixins/index'
 import { shallowMount } from '@vue/test-utils'
 
 describe('Index mixin', () => {

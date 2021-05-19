@@ -194,7 +194,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <script>
 import { mapState, mapMutations } from 'vuex'
-import { mixin } from '@/mixins'
+import mixin from '@/mixins'
 import {
   resetFontSize,
   decreaseFontSize,

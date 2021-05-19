@@ -77,7 +77,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <script>
 import { mapState } from 'vuex'
-import { mixin } from '@/mixins/index'
+import mixin from '@/mixins/index'
 import i18n from '@/i18n'
 import { WORKFLOWS_TABLE_QUERY } from '@/graphql/queries'
 import { mdiTable } from '@mdi/js'
