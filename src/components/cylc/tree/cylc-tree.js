@@ -17,39 +17,9 @@
 import { extractGroupState } from '@/utils/tasks'
 import { mergeWith } from 'lodash'
 import { createFamilyProxyNode, getCyclePointId } from '@/components/cylc/tree/tree-nodes'
-import Vue from 'vue'
+import { mergeWithCustomizer } from '@/utils/merge'
 
 export const FAMILY_ROOT = 'root'
-
-/**
- * Only effectively used if we return something. Otherwise Lodash will use its default merge
- * function. We use it here not to mutate objects, but to check that we are not losing
- * reactivity in Vue by adding a non-reactive property into an existing object (which should
- * be reactive and used in the node tree component).
- *
- * @see https://docs-lodash.com/v4/merge-with/
- * @param {?*} objValue - destination value in the existing object (same as object[key])
- * @param {?*} srcValue - source value from the object with new values to be merged
- * @param {string} key - name of the property being merged (used to access object[key])
- * @param {*} object - the object being mutated (original, destination, the value is retrieved with object[key])
- * @param {*} source - the source object
- */
-function mergeWithCustomizer (objValue, srcValue, key, object, source) {
-  if (srcValue !== undefined) {
-    // 1. object[key], or objValue, is undefined
-    //    meaning the destination object does not have the property
-    //    so let's add it with reactivity!
-    if (objValue === undefined) {
-      Vue.set(object, `${key}`, srcValue)
-    }
-    // 2. object[key], or objValue, is defined but without reactivity
-    //    this means somehow the object got a new property that is not reactive
-    //    so let's now make it reactive with the new value!
-    if (object[key] && !object[key].__ob__) {
-      Vue.set(object, `${key}`, srcValue)
-    }
-  }
-}
 
 /**
  * Compute the state of each cycle point node in the list given.
