@@ -82,6 +82,7 @@
     "istanbul-instrumenter-loader": "^3.0.1",
     "istanbul-lib-coverage": "^3.0.0",
     "json-server": "^0.16.3",
+    "lodash.clonedeep": "^4.5.0",
     "null-loader": "^4.0.1",
     "nyc": "^15.1.0",
     "sass": "^1.32.12",
