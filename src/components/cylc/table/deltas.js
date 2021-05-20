@@ -20,10 +20,10 @@ import { mergeWithCustomizer } from '@/utils/merge'
 import Vue from 'vue'
 
 /**
- * @param {Deltas} data
  * @param {Object} tasks
+ * @param {Deltas} data
  */
-export const applyTableDeltas = (data, tasks) => {
+export const applyTableDeltas = (tasks, data) => {
   const added = data.added
   const pruned = data.pruned
   const updated = data.updated

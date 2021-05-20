@@ -92,7 +92,7 @@ export default {
         .$workflowService
         .startDeltasSubscription(WORKFLOW_TREE_DELTAS_SUBSCRIPTION, vm.variables, {
           next: function next (response) {
-            applyDeltas(response.data.deltas, vm.tree)
+            applyDeltas(vm.tree, response.data.deltas)
           },
           error: function error (err) {
             vm.setAlert(new Alert(err.message, null, 'error'))
@@ -116,7 +116,7 @@ export default {
         .$workflowService
         .startDeltasSubscription(WORKFLOW_TREE_DELTAS_SUBSCRIPTION, vm.variables, {
           next: function next (response) {
-            applyDeltas(response.data.deltas, vm.tree)
+            applyDeltas(vm.tree, response.data.deltas)
           },
           error: function error (err) {
             vm.setAlert(new Alert(err.message, null, 'error'))

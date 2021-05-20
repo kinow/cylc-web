@@ -200,10 +200,10 @@ function handleDeltas (deltas, tree) {
 }
 
 /**
- * @param {?Deltas} deltas
  * @param {?CylcTree} tree
+ * @param {?Deltas} deltas
  */
-export function applyDeltas (deltas, tree) {
+export function applyDeltas (tree, deltas) {
   if (deltas && tree) {
     // first we check whether it is a shutdown response
     if (deltas.shutdown) {

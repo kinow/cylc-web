@@ -47,10 +47,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             type="list-item-three-line"
             tab-title="table"
         >
-       <table-component
-           :tasks="table"
-       />
-      </v-skeleton-loader>
+         <table-component
+           :tasks="tableTasks"
+         />
+        </v-skeleton-loader>
         <mutations-view
           v-for="widgetId of mutationsWidgets"
           :key="widgetId"
@@ -69,10 +69,10 @@ import graphqlMixin from '@/mixins/graphql'
 import treeViewMixin from '@/mixins/treeview'
 import { mapState } from 'vuex'
 import Lumino from '@/components/cylc/workflow/Lumino'
-import { WORKFLOW_TREE_DELTAS_SUBSCRIPTION, WORKFLOW_TABLE_DELTAS_SUBSCRIPTION } from '@/graphql/queries'
+import { WORKFLOW_TREE_DELTAS_SUBSCRIPTION } from '@/graphql/queries'
 import CylcTree from '@/components/cylc/tree/cylc-tree'
 import { applyDeltas } from '@/components/cylc/tree/deltas'
-import applyTableDeltas from '@/views/Table'
+import { applyTableDeltas } from '@/components/cylc/table/deltas'
 import Alert from '@/model/Alert.model'
 import { each, iter } from '@lumino/algorithm'
 import TreeComponent from '@/components/cylc/tree/Tree.vue'
@@ -81,6 +81,7 @@ import MutationsView from '@/views/Mutations'
 import Vue from 'vue'
 import Toolbar from '@/components/cylc/workflow/Toolbar.vue'
 import CylcObjectMenu from '@/components/cylc/cylcObject/Menu'
+import partial from 'lodash/partial'
 
 export default {
   mixins: [
@@ -110,7 +111,6 @@ export default {
   },
   data: () => ({
     deltaSubscriptions: [],
-    deltaTableSubscriptions: [],
     /**
      * The CylcTree object, which receives delta updates. We must have only one for this
      * view, and it should contain data only while the tree subscription is active (i.e.
@@ -119,7 +119,7 @@ export default {
      * @type {CylcTree}
      */
     tree: new CylcTree(),
-    table: [],
+    table: {},
     isLoading: true,
     // the widgets added to the view
     /**
@@ -127,7 +127,8 @@ export default {
      *   Object.<string, string>
      * }
      */
-    widgets: {}
+    widgets: {},
+    deltasCallbacks: []
   }),
   computed: {
     ...mapState('user', ['user']),
@@ -148,6 +149,9 @@ export default {
         .entries(this.widgets)
         .filter(([id, type]) => type === MutationsView.name)
         .map(([id]) => id)
+    },
+    tableTasks () {
+      return Object.values(this.table)
     }
   },
   beforeRouteEnter (to, from, next) {
@@ -160,8 +164,7 @@ export default {
   beforeRouteUpdate (to, from, next) {
     this.isLoading = true
     // clear the tree with current workflow data
-    this.tree.clear()
-    this.table = []
+    this.table = {}
     // stop delta subscription if any
     this.$workflowService.stopDeltasSubscription()
     // clear all widgets
@@ -177,7 +180,7 @@ export default {
   beforeRouteLeave (to, from, next) {
     this.$workflowService.stopDeltasSubscription()
     this.tree.clear()
-    this.table = []
+    this.table = {}
     next()
   },
   methods: {
@@ -192,7 +195,9 @@ export default {
         this.$workflowService
           .startDeltasSubscription(WORKFLOW_TREE_DELTAS_SUBSCRIPTION, this.variables, {
             next: function next (response) {
-              applyDeltas(response.data.deltas, vm.tree)
+              vm.deltasCallbacks.forEach(deltasCallback => {
+                deltasCallback(response.data.deltas)
+              })
               vm.isLoading = false
             },
             error: function error (err) {
@@ -204,40 +209,6 @@ export default {
       this.deltaSubscriptions.push(id)
       return id
     },
-    subscribeTableDeltas () {
-      const id = new Date().getTime()
-      // start deltas subscription if not running
-      if (this.deltaTableSubscriptions.length === 0) {
-        const vm = this
-        this.$workflowService
-          .startDeltasSubscription(WORKFLOW_TABLE_DELTAS_SUBSCRIPTION, this.variables, {
-            next: function next (response) {
-              applyTableDeltas(response.data.deltas, vm.table)
-              vm.isLoading = false
-            },
-            error: function error (err) {
-              vm.setAlert(new Alert(err.message, null, 'error'))
-              vm.isLoading = false
-            }
-          })
-      }
-      if (this.deltaTableSubscriptions.length === 0) {
-        const vm = this
-        this.$workflowService
-          .startDeltasSubscription(WORKFLOW_TABLE_DELTAS_SUBSCRIPTION, this.variables, {
-            next: function next (response) {
-              applyTableDeltas(response.data.deltas, vm.table)
-              vm.isLoading = false
-            },
-            error: function error (err) {
-              vm.setAlert(new Alert(err.message, null, 'error'))
-              vm.isLoading = false
-            }
-          })
-      }
-      this.deltaTableSubscriptions.push(id)
-      return id
-    },
     /**
      * Add a new view widget.
      *
@@ -247,9 +218,15 @@ export default {
       if (view === 'tree') {
         const subscriptionId = this.subscribeDeltas()
         Vue.set(this.widgets, subscriptionId, TreeComponent.name)
+        if (!this.deltasCallbacks.includes(applyDeltas)) {
+          this.deltasCallbacks.push(partial(applyDeltas, this.tree))
+        }
       } else if (view === 'table') {
-        const subscriptionId = this.subscribeTableDeltas()
+        const subscriptionId = this.subscribeDeltas()
         Vue.set(this.widgets, subscriptionId, TableComponent.name)
+        if (!this.deltasCallbacks.includes(applyTableDeltas)) {
+          this.deltasCallbacks.push(partial(applyTableDeltas, this.table))
+        }
       } else if (view === 'mutations') {
         Vue.set(this.widgets, (new Date()).getTime(), MutationsView.name)
       } else {
@@ -290,13 +267,6 @@ export default {
         if (this.deltaSubscriptions.length === 0) {
           this.$workflowService.stopDeltasSubscription()
           this.tree.clear()
-        } else if (vm.deltaTableSubscriptions.includes(subscriptionId)) {
-          // if this is a table widget with a deltas subscription, then stop it if the last widget using it
-          vm.deltaSubscriptions.splice(this.deltaSubscriptions.indexOf(subscriptionId), 1)
-          if (this.deltaTableSubscriptions.length === 0) {
-            this.$workflowService.stopTableDeltasSubscription()
-            this.table.clear()
-          }
         }
         if (Object.entries(this.widgets).length === 0) {
           this.isLoading = true
