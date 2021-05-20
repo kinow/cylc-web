@@ -132,19 +132,19 @@ export default {
     treeWidgets () {
       return Object
         .entries(this.widgets)
-        .filter(([type]) => type === TreeComponent.name)
+        .filter(([id, type]) => type === TreeComponent.name)
         .map(([id]) => id)
     },
     tableWidgets () {
       return Object
         .entries(this.widgets)
-        .filter(([type]) => type === TableComponent.name)
+        .filter(([id, type]) => type === TableComponent.name)
         .map(([id]) => id)
     },
     mutationsWidgets () {
       return Object
         .entries(this.widgets)
-        .filter(([type]) => type === MutationsView.name)
+        .filter(([id, type]) => type === MutationsView.name)
         .map(([id]) => id)
     }
   },
