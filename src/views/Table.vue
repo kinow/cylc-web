@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <script>
 import mixin from '@/mixins'
 import graphqlMixin from '@/mixins/graphql'
+import alertsMixin from '@/mixins/alerts'
 import TableComponent from '@/components/cylc/table/Table'
 import { WORKFLOW_TREE_DELTAS_SUBSCRIPTION } from '@/graphql/queries'
 import Alert from '@/model/Alert.model'
@@ -39,6 +40,7 @@ import { applyTableDeltas } from '@/components/cylc/table/deltas'
 
 export default {
   mixins: [
+    alertsMixin,
     mixin,
     graphqlMixin
   ],

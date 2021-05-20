@@ -67,6 +67,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import mixin from '@/mixins'
 import graphqlMixin from '@/mixins/graphql'
 import treeViewMixin from '@/mixins/treeview'
+import alertsMixin from '@/mixins/alerts'
 import { mapState } from 'vuex'
 import Lumino from '@/components/cylc/workflow/Lumino'
 import { WORKFLOW_TREE_DELTAS_SUBSCRIPTION } from '@/graphql/queries'
@@ -85,6 +86,7 @@ import partial from 'lodash/partial'
 
 export default {
   mixins: [
+    alertsMixin,
     mixin,
     graphqlMixin,
     treeViewMixin
