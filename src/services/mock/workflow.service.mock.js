@@ -217,7 +217,8 @@ class MockWorkflowService extends GQuery {
       data: {
         deltas: {
           added: {
-            workflow: checkpoint.workflows[0]
+            workflow: checkpoint.workflows[0],
+            taskProxies: checkpoint.workflows[0].taskProxies
           }
         },
         workflows: checkpoint.workflows

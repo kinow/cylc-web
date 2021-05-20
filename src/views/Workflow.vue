@@ -47,10 +47,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             type="list-item-three-line"
             tab-title="table"
         >
-         <table-component
-             :tasks="table"
-         />
-        </v-skeleton-loader>
+       <table-component
+           :tasks="table"
+       />
+      </v-skeleton-loader>
         <mutations-view
           v-for="widgetId of mutationsWidgets"
           :key="widgetId"
@@ -66,13 +66,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <script>
 import { mixin } from '@/mixins'
 import { datatree } from '@/mixins/treeview'
-import { datatable } from '@/mixins/tableview'
 import { mapState } from 'vuex'
 import Lumino from '@/components/cylc/workflow/Lumino'
 import { WORKFLOW_TREE_DELTAS_SUBSCRIPTION, WORKFLOW_TABLE_DELTAS_SUBSCRIPTION } from '@/graphql/queries'
 import CylcTree from '@/components/cylc/tree/cylc-tree'
 import { applyDeltas } from '@/components/cylc/tree/deltas'
-import { applyTableDeltas } from '@/views/Table'
+import applyTableDeltas from '@/views/Table'
 import Alert from '@/model/Alert.model'
 import { each, iter } from '@lumino/algorithm'
 import TreeComponent from '@/components/cylc/tree/Tree.vue'
@@ -85,8 +84,7 @@ import CylcObjectMenu from '@/components/cylc/cylcObject/Menu'
 export default {
   mixins: [
     mixin,
-    datatree,
-    datatable
+    datatree
   ],
   name: 'Workflow',
   props: {
@@ -134,20 +132,20 @@ export default {
     treeWidgets () {
       return Object
         .entries(this.widgets)
-        .filter(([id, type]) => type === TreeComponent.name)
-        .map(([id, type]) => id)
+        .filter(([type]) => type === TreeComponent.name)
+        .map(([id]) => id)
     },
     tableWidgets () {
       return Object
         .entries(this.widgets)
-        .filter(([id, type]) => type === TableComponent.name)
-        .map(([id, type]) => id)
+        .filter(([type]) => type === TableComponent.name)
+        .map(([id]) => id)
     },
     mutationsWidgets () {
       return Object
         .entries(this.widgets)
-        .filter(([id, type]) => type === MutationsView.name)
-        .map(([id, type]) => id)
+        .filter(([type]) => type === MutationsView.name)
+        .map(([id]) => id)
     }
   },
   beforeRouteEnter (to, from, next) {
@@ -161,7 +159,7 @@ export default {
     this.isLoading = true
     // clear the tree with current workflow data
     this.tree.clear()
-    this.table.clear()
+    this.table = []
     // stop delta subscription if any
     this.$workflowService.stopDeltasSubscription()
     // clear all widgets
@@ -177,7 +175,7 @@ export default {
   beforeRouteLeave (to, from, next) {
     this.$workflowService.stopDeltasSubscription()
     this.tree.clear()
-    this.table.clear()
+    this.table = []
     next()
   },
   methods: {
@@ -187,20 +185,6 @@ export default {
     subscribeDeltas () {
       const id = new Date().getTime()
       // start deltas subscription if not running
-      if (this.deltaSubscriptions.length === 0) {
-        const vm = this
-        this.$workflowService
-          .startDeltasSubscription(WORKFLOW_TREE_DELTAS_SUBSCRIPTION, this.variables, {
-            next: function next (response) {
-              applyDeltas(response.data.deltas, vm.tree)
-              vm.isLoading = false
-            },
-            error: function error (err) {
-              vm.setAlert(new Alert(err.message, null, 'error'))
-              vm.isLoading = false
-            }
-          })
-      }
       if (this.deltaSubscriptions.length === 0) {
         const vm = this
         this.$workflowService
