@@ -218,17 +218,17 @@ export default {
      */
     addView (view) {
       if (view === 'tree') {
-        const subscriptionId = this.subscribeDeltas()
-        Vue.set(this.widgets, subscriptionId, TreeComponent.name)
         if (!Object.keys(this.deltasCallbacks).includes(TreeComponent.name)) {
           this.deltasCallbacks[TreeComponent.name] = partial(applyDeltas, this.tree)
         }
-      } else if (view === 'table') {
         const subscriptionId = this.subscribeDeltas()
-        Vue.set(this.widgets, subscriptionId, TableComponent.name)
+        Vue.set(this.widgets, subscriptionId, TreeComponent.name)
+      } else if (view === 'table') {
         if (!Object.keys(this.deltasCallbacks).includes(TableComponent.name)) {
           this.deltasCallbacks[TableComponent.name] = partial(applyTableDeltas, this.table)
         }
+        const subscriptionId = this.subscribeDeltas()
+        Vue.set(this.widgets, subscriptionId, TableComponent.name)
       } else if (view === 'mutations') {
         Vue.set(this.widgets, (new Date()).getTime(), MutationsView.name)
       } else {
