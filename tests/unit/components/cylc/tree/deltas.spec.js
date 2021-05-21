@@ -45,9 +45,9 @@ describe('Deltas', () => {
       id: WORKFLOW_ID
     }))
     expect(cylcTree.lookup.size).to.equal(1)
-    applyDeltas({
+    applyDeltas(cylcTree, {
       shutdown: true
-    }, cylcTree)
+    })
     expect(cylcTree.lookup.size).to.equal(0)
   })
   it('Should not tally the cycle point states unless deltas were provided', () => {
@@ -56,16 +56,16 @@ describe('Deltas', () => {
       id: WORKFLOW_ID
     }))
     const fakeTree = sinon.spy(cylcTree)
-    applyDeltas({
+    applyDeltas(fakeTree, {
       id: WORKFLOW_ID
-    }, fakeTree)
+    })
     expect(fakeTree.tallyCyclePointStates.called).to.equal(false)
   })
   it('Should warn if the initial data burst has invalid data', () => {
     const sandbox = sinon.createSandbox()
     sandbox.stub(console, 'error')
     const cylcTree = new CylcTree()
-    applyDeltas({}, cylcTree)
+    applyDeltas(cylcTree, {})
     expect(console.error.calledOnce).to.equal(true)
     sandbox.restore()
   })
@@ -88,7 +88,7 @@ describe('Deltas', () => {
     }))
     // let's force the tree to throw an error when adding cycle points, simulating a runtime exception
     sinon.stub(cylcTree, 'addCyclePoint').throws(Error)
-    applyDeltas(deltasAdded, cylcTree)
+    applyDeltas(cylcTree, deltasAdded)
     expect(console.error.calledOnce).to.equal(true)
     sandbox.restore()
     expect(store.state.alert.getText()).to.have.string('added-delta')
@@ -110,7 +110,7 @@ describe('Deltas', () => {
     const cylcTree = new CylcTree()
     sinon.stub(cylcTree, 'tallyCyclePointStates').throws(Error)
     // let's force the tree to throw an error when handling the first data burst, simulating a runtime exception
-    expect(() => applyDeltas(deltasAdded, cylcTree)).to.throw(Error)
+    expect(() => applyDeltas(cylcTree, deltasAdded)).to.throw(Error)
     expect(console.error.calledOnce).to.equal(true)
     sandbox.restore()
     expect(store.state.alert.getText()).to.have.string('initial data burst')
@@ -134,7 +134,7 @@ describe('Deltas', () => {
         }
       }
       const fakeTree = sinon.spy(cylcTree)
-      applyDeltas(deltasWithInitialDataBurst, fakeTree)
+      applyDeltas(fakeTree, deltasWithInitialDataBurst)
       expect(cylcTree.root.id).to.equal(WORKFLOW_ID)
       expect(fakeTree.tallyCyclePointStates.called).to.equal(true)
     })
@@ -153,7 +153,7 @@ describe('Deltas', () => {
           }
         }
       }
-      expect(() => applyDeltas(deltasWithInitialDataBurst, cylcTree)).to.not.throw(Error)
+      expect(() => applyDeltas(cylcTree, deltasWithInitialDataBurst)).to.not.throw(Error)
       expect(console.error.calledOnce).to.equal(false)
       sandbox.restore()
     })
@@ -180,7 +180,7 @@ describe('Deltas', () => {
         }
       }
       const fakeTree = sinon.spy(cylcTree)
-      applyDeltas(deltasAdded, fakeTree)
+      applyDeltas(fakeTree, deltasAdded)
       expect(cylcTree.root.children[0].id).to.equal(cyclePointId)
       expect(fakeTree.tallyCyclePointStates.called).to.equal(true)
     })
@@ -223,7 +223,7 @@ describe('Deltas', () => {
         }
       }
       const fakeTree = sinon.spy(cylcTree)
-      applyDeltas(deltasUpdated, fakeTree)
+      applyDeltas(fakeTree, deltasUpdated)
       expect(cylcTree.root.children[0].children[0].node.state).to.equal(TaskState.FAILED.name)
       expect(fakeTree.tallyCyclePointStates.called).to.equal(true)
     })
@@ -267,7 +267,7 @@ describe('Deltas', () => {
           ]
         }
       }
-      applyDeltas(deltasPruningFamily, fakeTree)
+      applyDeltas(fakeTree, deltasPruningFamily)
       // cycle point is now empty
       expect(cylcTree.root.children[0].children.length).to.equal(0)
       expect(fakeTree.tallyCyclePointStates.called).to.equal(true)
@@ -282,7 +282,7 @@ describe('Deltas', () => {
           ]
         }
       }
-      applyDeltas(deltasPruningCyclePoint, fakeTree)
+      applyDeltas(fakeTree, deltasPruningCyclePoint)
       // now the cycle point was removed as well!
       expect(cylcTree.root.children.length).to.equal(0)
       expect(fakeTree.tallyCyclePointStates.called).to.equal(true)

@@ -64,16 +64,25 @@ function taskEstimatedDuration (taskProxy) {
   return null
 }
 
-function latestJob (taskProxy) {
-  if (taskProxy && taskProxy.children && taskProxy.children.length > 0) {
-    return taskProxy.children[0]
+function latestJob (jobs) {
+  if (jobs && jobs.length > 0) {
+    return jobs[0].node
   }
   return null
+}
+
+function getTaskJobProps (task, property) {
+  const job = latestJob(task.children)
+  if (job) {
+    return job[property]
+  }
+  return ''
 }
 
 export {
   extractGroupState,
   taskStartTime,
   taskEstimatedDuration,
-  latestJob
+  latestJob,
+  getTaskJobProps
 }

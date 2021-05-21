@@ -64,7 +64,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             :status="node.node.state"
             :isHeld="node.node.isHeld"
             :isQueued="node.node.isQueued"
-            :startTime="taskStartTime(node.node, latestJob(node.node))"
+            :startTime="taskStartTime(node.node, latestJob(node.children))"
             :estimatedDuration="taskEstimatedDuration(node.node)"
           />
           <div v-if="!isExpanded" class="node-summary">
@@ -212,7 +212,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <script>
 import Task from '@/components/cylc/Task'
 import Job from '@/components/cylc/Job'
-import { taskStartTime, taskEstimatedDuration, latestJob } from '@/utils/tasks'
+import {
+  taskStartTime,
+  taskEstimatedDuration,
+  latestJob
+} from '@/utils/tasks'
 
 /**
  * Offset used to move nodes to the right or left, to represent the nodes hierarchy.

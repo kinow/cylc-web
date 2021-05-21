@@ -22,32 +22,41 @@ const BASE_ID = 'cylc|workflow|1'
 const simpleTableTasks = [
   {
     id: `${BASE_ID}|taskA`,
-    state: TaskState.RUNNING.name,
-    name: 'taskA',
-    meanElapsedTime: 2000,
-    jobs: [
+    node: {
+      state: TaskState.RUNNING.name,
+      name: 'taskA',
+      meanElapsedTime: 2000
+    },
+    children: [
       {
-        platform: 'localhost',
-        jobRunnerName: 'background',
-        jobId: '1',
-        submittedTime: new Date(),
-        startedTime: new Date(),
-        finishedTime: null,
-        state: JobState.RUNNING.name
+        id: `${BASE_ID}|taskA|1`,
+        node: {
+          platform: 'localhost',
+          jobRunnerName: 'background',
+          jobId: '1',
+          submittedTime: 'Fri May 21 2021 15:54:29 GMT+1200 (New Zealand Standard Time)',
+          startedTime: 'Fri May 21 2021 15:54:29 GMT+1200 (New Zealand Standard Time)',
+          finishedTime: null,
+          state: JobState.RUNNING.name
+        }
       }
     ]
   },
   {
     id: `${BASE_ID}|taskB`,
-    state: TaskState.WAITING.name,
-    name: 'taskB',
-    jobs: []
+    node: {
+      state: TaskState.WAITING.name,
+      name: 'taskB'
+    },
+    children: []
   },
   {
     id: `${BASE_ID}|taskB`,
-    state: TaskState.SUBMITTED.name,
-    name: 'taskB',
-    jobs: []
+    node: {
+      state: TaskState.SUBMITTED.name,
+      name: 'taskB'
+    },
+    children: []
   }
 ]
 

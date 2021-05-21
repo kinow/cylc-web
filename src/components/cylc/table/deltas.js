@@ -15,6 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {
+  createJobNode,
+  createTaskProxyNode
+} from '@/components/cylc/tree/tree-nodes'
 import { mergeWith } from 'lodash'
 import { mergeWithCustomizer } from '@/utils/merge'
 import Vue from 'vue'
@@ -31,7 +35,7 @@ export const applyTableDeltas = (tasks, data) => {
     if (added.workflow.taskProxies) {
       for (const taskProxy of added.workflow.taskProxies) {
         if (!tasks[taskProxy.id]) {
-          Vue.set(tasks, taskProxy.id, taskProxy)
+          Vue.set(tasks, taskProxy.id, createTaskProxyNode(taskProxy))
         }
       }
     }
@@ -39,9 +43,8 @@ export const applyTableDeltas = (tasks, data) => {
       for (const job of added.workflow.jobs) {
         const existingTask = tasks[job.firstParent.id]
         if (existingTask) {
-          const children = existingTask.children || []
-          children.push(job)
-          Vue.set(existingTask, 'children', children)
+          const children = existingTask.children
+          children.push(createJobNode(job))
         }
       }
     }
@@ -50,7 +53,7 @@ export const applyTableDeltas = (tasks, data) => {
     if (updated.taskProxies) {
       for (const taskProxy of updated.taskProxies) {
         if (tasks[taskProxy.id]) {
-          mergeWith(tasks[taskProxy.id], taskProxy, mergeWithCustomizer)
+          mergeWith(tasks[taskProxy.id], createTaskProxyNode(taskProxy), mergeWithCustomizer)
         }
       }
     }
@@ -59,14 +62,13 @@ export const applyTableDeltas = (tasks, data) => {
         // FIXME: job.firstParent is always empty for bar? / five workflow
         if (job.firstParent && job.firstParent.id) {
           const existingTask = tasks[job.firstParent.id]
-          const children = existingTask.children || []
+          const children = existingTask.children
           const existingJob = children.find(existingJob => existingJob.id === job.id)
           if (existingJob) {
-            mergeWith(existingJob, job, mergeWithCustomizer)
+            mergeWith(existingJob, createJobNode(job), mergeWithCustomizer)
           } else {
-            children.push(job)
+            children.push(createJobNode(job))
           }
-          Vue.set(existingTask, 'children', children)
         }
       }
     }

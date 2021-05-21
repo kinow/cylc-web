@@ -121,25 +121,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <div class="mr-1">
                 <Task
                   v-cylc-object="item.id"
-                  :status="item.state"
-                  :startTime="taskStartTime(item, latestJob(item))"
-                  :estimatedDuration="taskEstimatedDuration(item)"
+                  :key="item.id"
+                  :status="item.node.state"
+                  :isHeld="item.node.isHeld"
+                  :isQueued="item.node.isQueued"
+                  :startTime="taskStartTime(item.node, latestJob(item.children))"
+                  :estimatedDuration="taskEstimatedDuration(item.node)"
                 />
               </div>
               <div class="mr-1">
-                <Job :status="getTaskJobProps(item, 'state')" />
+                <Job
+                  v-cylc-object="getTaskJobProps(item, 'id')"
+                  :key="getTaskJobProps(item, 'id')"
+                  :status="getTaskJobProps(item, 'state')"
+                />
               </div>
-              <div>{{ item.name }}</div>
+              <div>{{ item.node.name }}</div>
             </div>
           </td>
-          <td>{{ item.cyclePoint }}</td>
-          <td>{{ getTaskJobProps(latestJob(item), 'platform') }}</td>
-          <td>{{ getTaskJobProps(latestJob(item), 'jobRunnerName') }}</td>
-          <td>{{ getTaskJobProps(latestJob(item), 'jobId') }}</td>
-          <td>{{ getTaskJobProps(latestJob(item), 'submittedTime') }}</td>
-          <td>{{ getTaskJobProps(latestJob(item), 'startedTime') }}</td>
-          <td>{{ getTaskJobProps(latestJob(item), 'finishedTime') }}</td>
-          <td>{{ item.meanElapsedTime }}</td>
+          <td>{{ item.node.cyclePoint }}</td>
+          <td>{{ getTaskJobProps(item, 'platform') }}</td>
+          <td>{{ getTaskJobProps(item, 'jobRunnerName') }}</td>
+          <td>{{ getTaskJobProps(item, 'jobId') }}</td>
+          <td>{{ getTaskJobProps(item, 'submittedTime') }}</td>
+          <td>{{ getTaskJobProps(item, 'startedTime') }}</td>
+          <td>{{ getTaskJobProps(item, 'finishedTime') }}</td>
+          <td>{{ item.node.meanElapsedTime }}</td>
         </tr>
       </template>
     </v-data-table>
@@ -151,7 +158,12 @@ import TaskState from '@/model/TaskState.model'
 import Task from '@/components/cylc/Task'
 import Job from '@/components/cylc/Job'
 import cloneDeep from 'lodash/cloneDeep'
-import { taskStartTime, taskEstimatedDuration, latestJob } from '@/utils/tasks'
+import {
+  taskStartTime,
+  taskEstimatedDuration,
+  latestJob,
+  getTaskJobProps
+} from '@/utils/tasks'
 
 export default {
   name: 'TableComponent',
@@ -230,23 +242,17 @@ export default {
       return this.tasks
         .filter(task => {
           if (filterByName && filterByState) {
-            return task.name.includes(this.activeFilters.name) && this.tasksFilterStates.includes(task.state)
+            return task.node.name.includes(this.activeFilters.name) && this.tasksFilterStates.includes(task.node.state)
           } else if (filterByName) {
-            return task.name.includes(this.activeFilters.name)
+            return task.node.name.includes(this.activeFilters.name)
           } else if (filterByState) {
-            return this.tasksFilterStates.includes(task.state)
+            return this.tasksFilterStates.includes(task.node.state)
           }
           return true
         })
     }
   },
   methods: {
-    getTaskJobProps (job, property) {
-      if (job) {
-        return job[property]
-      }
-      return ''
-    },
     filterByTaskName () {
       return this.activeFilters &&
         this.activeFilters.name !== undefined &&
@@ -274,7 +280,8 @@ export default {
     },
     taskStartTime,
     taskEstimatedDuration,
-    latestJob
+    latestJob,
+    getTaskJobProps
   }
 }
 </script>
