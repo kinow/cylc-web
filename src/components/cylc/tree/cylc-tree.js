@@ -18,6 +18,7 @@ import { extractGroupState } from '@/utils/tasks'
 import { mergeWith } from 'lodash'
 import { createFamilyProxyNode, getCyclePointId } from '@/components/cylc/tree/tree-nodes'
 import { mergeWithCustomizer } from '@/utils/merge'
+import Vue from 'vue'
 
 export const FAMILY_ROOT = 'root'
 
