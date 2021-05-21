@@ -130,7 +130,7 @@ export default {
      * }
      */
     widgets: {},
-    deltasCallbacks: []
+    deltasCallbacks: {}
   }),
   computed: {
     ...mapState('user', ['user']),
@@ -197,7 +197,7 @@ export default {
         this.$workflowService
           .startDeltasSubscription(WORKFLOW_TREE_DELTAS_SUBSCRIPTION, this.variables, {
             next: function next (response) {
-              vm.deltasCallbacks.forEach(deltasCallback => {
+              Object.values(vm.deltasCallbacks).forEach(deltasCallback => {
                 deltasCallback(response.data.deltas)
               })
               vm.isLoading = false
@@ -220,14 +220,14 @@ export default {
       if (view === 'tree') {
         const subscriptionId = this.subscribeDeltas()
         Vue.set(this.widgets, subscriptionId, TreeComponent.name)
-        if (!this.deltasCallbacks.includes(applyDeltas)) {
-          this.deltasCallbacks.push(partial(applyDeltas, this.tree))
+        if (!Object.keys(this.deltasCallbacks).includes(TreeComponent.name)) {
+          this.deltasCallbacks[TreeComponent.name] = partial(applyDeltas, this.tree)
         }
       } else if (view === 'table') {
         const subscriptionId = this.subscribeDeltas()
         Vue.set(this.widgets, subscriptionId, TableComponent.name)
-        if (!this.deltasCallbacks.includes(applyTableDeltas)) {
-          this.deltasCallbacks.push(partial(applyTableDeltas, this.table))
+        if (!Object.keys(this.deltasCallbacks).includes(TableComponent.name)) {
+          this.deltasCallbacks[TableComponent.name] = partial(applyTableDeltas, this.table)
         }
       } else if (view === 'mutations') {
         Vue.set(this.widgets, (new Date()).getTime(), MutationsView.name)
@@ -264,12 +264,23 @@ export default {
       const vm = this
       const subscriptionId = Number.parseFloat(event.id)
       if (vm.deltaSubscriptions.includes(subscriptionId)) {
-        // if this is a tree widget with a deltas subscription, then stop it if the last widget using it
         vm.deltaSubscriptions.splice(this.deltaSubscriptions.indexOf(subscriptionId), 1)
+        // if there are no more tree widgets, we want to remove the tree-deltas-callback
+        if (this.treeWidgets.length === 0) {
+          delete this.deltasCallbacks[TreeComponent.name]
+          this.tree.clear()
+        }
+        if (this.tableWidgets.length === 0) {
+          delete this.deltasCallbacks[TableComponent.name]
+          Object.keys(this.table).forEach(key => delete this.table[key])
+        }
+        // if there are no more widgets in the UI after this, then we want to stop the subscriptions
         if (this.deltaSubscriptions.length === 0) {
           this.$workflowService.stopDeltasSubscription()
           this.tree.clear()
+          Object.keys(this.table).forEach(key => delete this.table[key])
         }
+        // TODO: not needed?
         if (Object.entries(this.widgets).length === 0) {
           this.isLoading = true
         }
