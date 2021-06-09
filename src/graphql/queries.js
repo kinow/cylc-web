@@ -140,14 +140,14 @@ fragment WorkflowTreePrunedData on Pruned {
 
 # WORKFLOW DATA BEGIN
 
-fragment WorkflowData on Workflow {
-  id
-  name
-  status
-  owner
-  host
-  port
-}
+  fragment WorkflowData on Workflow {
+    id
+    name
+    status
+    owner
+    host
+    port
+  }
 
 fragment CyclePointData on FamilyProxy {
   id

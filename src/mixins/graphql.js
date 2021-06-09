@@ -16,6 +16,7 @@
  */
 
 import { mapState } from 'vuex'
+import store from '@/store/index'
 
 /**
  * A mixin for GraphQL, including the computed variables used in queries.
@@ -36,7 +37,7 @@ export default {
      * @return {string} - the Workflow ID used in this view
      */
     workflowId () {
-      return `${this.user.username}|${this.workflowName}`
+      return `${store.state.user.user.username}|${this.workflowName}`
     },
     /**
      * GraphQL query variables.
