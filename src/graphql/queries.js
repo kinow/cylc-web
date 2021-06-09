@@ -24,6 +24,44 @@ import { DocumentNode } from 'graphql'
 // IMPORTANT: queries here may be used in the offline mode to create mock data. Before removing or renaming
 // queries here, please check under the services/mock folder for occurrences of the variable name.
 
+const SUBSCRIPTION_DELTAS = gql`
+subscription ($workflowId: ID) {
+  deltas (workflows: [$workflowId], stripNull: true) {
+    id
+    shutdown
+    added {
+      ...AddedData
+    }
+    updated {
+      ...UpdatedData
+    }
+    pruned {
+      ...PrunedData
+    }
+  }
+}`
+
+const FRAGMENT_DELTAS_ADDED = gql`
+fragment AddedData on Added {
+  workflow {
+    ...WorkflowData
+  }
+}`
+
+const FRAGMENT_DELTAS_UPDATED = gql`
+fragment UpdatedData on Updated {
+  workflow {
+    ...WorkflowData
+  }
+}`
+
+const FRAGMENT_DELTAS_PRUNED = gql`
+fragment PrunedData on Pruned {
+  workflow
+}`
+
+// --- old
+
 /**
  * @type {DocumentNode}
  */
@@ -229,6 +267,10 @@ subscription WorkflowsTableQuery {
 `
 
 export {
+  SUBSCRIPTION_DELTAS,
+  FRAGMENT_DELTAS_ADDED,
+  FRAGMENT_DELTAS_UPDATED,
+  FRAGMENT_DELTAS_PRUNED,
   WORKFLOW_TREE_DELTAS_SUBSCRIPTION,
   DASHBOARD_QUERY,
   GSCAN_QUERY,
