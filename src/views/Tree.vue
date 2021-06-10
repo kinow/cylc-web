@@ -41,6 +41,16 @@ import alertsMixin from '@/mixins/alerts'
 import mixin from '@/mixins'
 import graphqlMixin from '@/mixins/graphql'
 import workflowViewMixin from '@/mixins/workflow-view'
+import {
+  CYCLEPOINT_DELTAS,
+  FAMILY_PROXY_DELTAS,
+  FRAGMENT_CYCLEPOINT_DATA,
+  FRAGMENT_FAMILY_PROXY_DATA,
+  FRAGMENT_JOB_DATA,
+  FRAGMENT_TASK_PROXY_DATA,
+  JOB_DELTAS,
+  TASK_PROXY_DELTAS
+} from '@/graphql/queries'
 
 export default {
   mixins: [
@@ -60,7 +70,35 @@ export default {
 
   data: () => ({
     fragments: {
-      jobs: 'jobs'
+      AddedData: {
+        cyclePoint: CYCLEPOINT_DELTAS.added,
+        familyProxy: FAMILY_PROXY_DELTAS.added,
+        taskProxy: TASK_PROXY_DELTAS.added,
+        job: JOB_DELTAS.added
+      },
+      UpdatedData: {
+        cyclePoint: CYCLEPOINT_DELTAS.updated,
+        familyProxy: FAMILY_PROXY_DELTAS.updated,
+        taskProxy: TASK_PROXY_DELTAS.updated,
+        job: JOB_DELTAS.updated
+      },
+      PrunedData: {
+        familyProxy: FAMILY_PROXY_DELTAS.pruned,
+        taskProxy: TASK_PROXY_DELTAS.pruned,
+        job: JOB_DELTAS.pruned
+      },
+      CyclePointData: {
+        cyclePoint: FRAGMENT_CYCLEPOINT_DATA
+      },
+      FamilyProxyData: {
+        familyProxy: FRAGMENT_FAMILY_PROXY_DATA
+      },
+      TaskProxyData: {
+        taskProxy: FRAGMENT_TASK_PROXY_DATA
+      },
+      JobData: {
+        job: FRAGMENT_JOB_DATA
+      }
     },
     /**
      * This is the CylcTree, which contains the hierarchical tree data structure.

@@ -1,6 +1,8 @@
 import { applyDeltas } from '@/components/cylc/tree/deltas'
 import Alert from '@/model/Alert.model'
-import { SUBSCRIPTION_DELTAS } from '@/graphql/queries'
+import { FRAGMENT_WORKFLOW_DATA, SUBSCRIPTION_DELTAS, WORKFLOW_DELTAS } from '@/graphql/queries'
+// eslint-disable-next-line no-unused-vars
+import { print } from 'graphql/language/printer'
 
 /**
  * Copyright (C) NIWA & British Crown (Met Office) & Contributors.
@@ -27,25 +29,30 @@ export default {
   },
   data () {
     return {
-      fragments: {},
+      /**
+       * @type {Object.<string, Object>}
+       */
+      fragments: {
+        AddedData: {
+          workflow: WORKFLOW_DELTAS.added
+        },
+        UpdatedData: {
+          workflow: WORKFLOW_DELTAS.updated
+        },
+        PrunedData: {
+          workflow: WORKFLOW_DELTAS.pruned
+        },
+        WorkflowData: {
+          workflow: FRAGMENT_WORKFLOW_DATA
+        }
+      },
       /**
        * This is the workflow data. The GraphQL subscription query adds data
        * to this object in the view. Other structures can be created with
        * reactivity for views such as Tree, Table, Dot, Graph, etc.
        * @type {*}
        */
-      workflow: {},
-      /**
-       * Options passed to the GraphQL subscription (Apollo Client).
-       */
-      subscriptionOptions: {
-        next: function next (response) {
-          applyDeltas(response.data.deltas, this.workflow)
-        },
-        error: function error (err) {
-          this.setAlert(new Alert(err.message, null, 'error'))
-        }
-      }
+      workflow: {}
     }
   },
   computed: {
@@ -95,17 +102,66 @@ export default {
     next()
   },
   methods: {
+    /**
+     * Combine the fragments of the view and add the combined fragments into
+     * the query.
+     *
+     * @param {DocumentNode} query
+     */
+    combineFragments (query) {
+      // For each key in this.fragments...
+      Object.entries(this.fragments).forEach(value => {
+        const key = value[0]
+        const fragment = value[1]
+        // NOTE: The key of the fragment is meaningless to us; it's used only for the mixin-merging
+        //       of Vue 2. In Vue 3 we will use the composition API, so that might change soon-ish.
+        // Let's now reduce all the fragments into a single fragment...
+        const newFragment = Object.values(fragment).reduce((accumulator, fragment) => {
+          if (accumulator === null) {
+            // Let's use the first fragment to get started...
+            return fragment
+          }
+          const selections = accumulator.definitions[0].selectionSet.selections
+          const newSelections = fragment.definitions[0].selectionSet.selections
+          selections.push(...newSelections)
+          return accumulator
+        }, null)
+        const combinedDefinition = newFragment.definitions[0]
+        // The name of the definition as defined by the view.
+        combinedDefinition.name.value = key
+        // And now add it to our list of definitions of the GraphQL query. The very first
+        // definition here is always a Subscription, which uses the fragments (remaining
+        // definitions).
+        query.definitions.push(combinedDefinition)
+      })
+    },
+    /**
+     * Create the WebSockets GraphQL Subscription query.
+     *
+     * @returns {DocumentNode}
+     */
     createQuery () {
       const baseQuery = SUBSCRIPTION_DELTAS
-      console.log(this.fragments)
-      // TODO: aggregate fragments and create the final query
+      // N.B. if later we decide to merge fragments or queries instead, we only need to
+      // modify createQuery and combineFragments (probably rename or write a new function
+      // that merges instead of combining).
+
+      // The fragments are combined and added to the base query.
+      this.combineFragments(baseQuery)
       return baseQuery
     },
     startSubscription () {
       const query = this.createQuery()
       const variables = this.variables
-      const subscriptionOptions = this.subscriptionOptions
-      this.$workflowService.startDeltasSubscription(query, variables, subscriptionOptions)
+      const vm = this
+      this.$workflowService.startDeltasSubscription(query, variables, {
+        next: function next (response) {
+          applyDeltas(response.data.deltas, vm.workflow)
+        },
+        error: function error (err) {
+          this.setAlert(new Alert(err.message, null, 'error'))
+        }
+      })
     }
   }
 }

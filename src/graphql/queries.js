@@ -24,8 +24,11 @@ import { DocumentNode } from 'graphql'
 // IMPORTANT: queries here may be used in the offline mode to create mock data. Before removing or renaming
 // queries here, please check under the services/mock folder for occurrences of the variable name.
 
+/**
+ * @type {DocumentNode}
+ */
 const SUBSCRIPTION_DELTAS = gql`
-subscription ($workflowId: ID) {
+subscription OnWorkflowTreeDeltasData ($workflowId: ID) {
   deltas (workflows: [$workflowId], stripNull: true) {
     id
     shutdown
@@ -39,25 +42,187 @@ subscription ($workflowId: ID) {
       ...PrunedData
     }
   }
+}
+`
+
+/**
+ * @private
+ * @type {string}
+ */
+const WORKFLOW_SELECTION = `
+workflow {
+  ...WorkflowData
 }`
 
-const FRAGMENT_DELTAS_ADDED = gql`
-fragment AddedData on Added {
-  workflow {
-    ...WorkflowData
+const WORKFLOW_DELTAS = {
+  added: gql`
+  fragment AddedData on Added {
+    ${WORKFLOW_SELECTION}
+  }`,
+  updated: gql`
+  fragment UpdatedData on Updated {
+    ${WORKFLOW_SELECTION}
+  }`,
+  pruned: gql`
+  fragment PrunedData on Pruned {
+    workflow
+  }`
+}
+
+/**
+ * @private
+ * @type {string}
+ */
+const CYCLEPOINT_SELECTION = `
+cyclePoints: familyProxies (ids: ["root"], ghosts: true) {
+  ...CyclePointData
+}`
+
+const CYCLEPOINT_DELTAS = {
+  added: gql`
+  fragment CyclePointAddedData on Added {
+    ${CYCLEPOINT_SELECTION}
+  }`,
+  updated: gql`
+  fragment CyclePointUpdatedData on Updated {
+    ${CYCLEPOINT_SELECTION}
+  }`
+}
+
+const FAMILY_PROXY_SELECTION = `
+familyProxies (exids: ["root"], sort: { keys: ["name"] }, ghosts: true) {
+  ...FamilyProxyData
+}
+`
+
+const FAMILY_PROXY_DELTAS = {
+  added: gql`
+  fragment FamilyProxyAddedData on Added {
+    ${FAMILY_PROXY_SELECTION}
+  }`,
+  updated: gql`
+  fragment FamilyProxyUpdatedData on Updated {
+    ${FAMILY_PROXY_SELECTION}
+  }`,
+  pruned: gql`
+  fragment FamilyProxyPrunedData on Pruned {
+    familyProxies
+  }`
+}
+
+const TASK_PROXY_SELECTION = `
+taskProxies (sort: { keys: ["name"], reverse: false }, ghosts: true) {
+  ...TaskProxyData
+}`
+
+const TASK_PROXY_DELTAS = {
+  added: gql`
+  fragment TaskProxyAddedData on Added {
+    ${TASK_PROXY_SELECTION}
+  }`,
+  updated: gql`
+  fragment TaskProxyUpdatedData on Updated {
+    ${TASK_PROXY_SELECTION}
+  }`,
+  pruned: gql`
+  fragment TaskProxyPrunedData on Pruned {
+    taskProxies
+  }`
+}
+
+const JOB_SELECTION = `
+jobs(sort: { keys: ["submit_num"], reverse:true }) {
+  ...JobData
+}
+`
+
+const JOB_DELTAS = {
+  added: gql`
+  fragment JobAddedData on Added {
+    ${JOB_SELECTION}
+  }`,
+  updated: gql`
+  fragment JobUpdatedData on Updated {
+    ${JOB_SELECTION}
+  }`,
+  pruned: gql`
+  fragment JobPrunedData on Pruned {
+    jobs
+  }`
+}
+
+const FRAGMENT_WORKFLOW_DATA = gql`
+fragment WorkflowData on Workflow {
+  id
+  name
+  status
+  owner
+  host
+  port
+}
+`
+
+const FRAGMENT_CYCLEPOINT_DATA = gql`
+fragment CyclePointData on FamilyProxy {
+  id
+  cyclePoint
+}`
+
+const FRAGMENT_FAMILY_PROXY_DATA = gql`
+fragment FamilyProxyData on FamilyProxy {
+  id
+  name
+  state
+  cyclePoint
+  firstParent {
+    id
+    name
+    cyclePoint
+    state
   }
 }`
 
-const FRAGMENT_DELTAS_UPDATED = gql`
-fragment UpdatedData on Updated {
-  workflow {
-    ...WorkflowData
+const FRAGMENT_TASK_PROXY_DATA = gql`
+fragment TaskProxyData on TaskProxy {
+  id
+  name
+  state
+  isHeld
+  isQueued
+  isRunahead
+  cyclePoint
+  firstParent {
+    id
+    name
+    cyclePoint
+    state
+  }
+  task {
+    meanElapsedTime
+    name
   }
 }`
 
-const FRAGMENT_DELTAS_PRUNED = gql`
-fragment PrunedData on Pruned {
-  workflow
+const FRAGMENT_JOB_DATA = gql`
+fragment JobData on Job {
+  id
+  firstParent: taskProxy {
+    id
+  }
+  jobRunnerName
+  jobId
+  platform
+  startedTime
+  submittedTime
+  finishedTime
+  state
+  submitNum
+  taskProxy {
+    outputs (satisfied: true, sort: { keys: ["time"], reverse: true}) {
+      label
+      message
+    }
+  }
 }`
 
 // --- old
@@ -140,14 +305,14 @@ fragment WorkflowTreePrunedData on Pruned {
 
 # WORKFLOW DATA BEGIN
 
-  fragment WorkflowData on Workflow {
-    id
-    name
-    status
-    owner
-    host
-    port
-  }
+fragment WorkflowData on Workflow {
+  id
+  name
+  status
+  owner
+  host
+  port
+}
 
 fragment CyclePointData on FamilyProxy {
   id
@@ -268,9 +433,16 @@ subscription WorkflowsTableQuery {
 
 export {
   SUBSCRIPTION_DELTAS,
-  FRAGMENT_DELTAS_ADDED,
-  FRAGMENT_DELTAS_UPDATED,
-  FRAGMENT_DELTAS_PRUNED,
+  WORKFLOW_DELTAS,
+  CYCLEPOINT_DELTAS,
+  FAMILY_PROXY_DELTAS,
+  TASK_PROXY_DELTAS,
+  JOB_DELTAS,
+  FRAGMENT_WORKFLOW_DATA,
+  FRAGMENT_CYCLEPOINT_DATA,
+  FRAGMENT_FAMILY_PROXY_DATA,
+  FRAGMENT_TASK_PROXY_DATA,
+  FRAGMENT_JOB_DATA,
   WORKFLOW_TREE_DELTAS_SUBSCRIPTION,
   DASHBOARD_QUERY,
   GSCAN_QUERY,
