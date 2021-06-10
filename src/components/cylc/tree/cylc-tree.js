@@ -263,24 +263,25 @@ class CylcTree {
    * Create a tree with an initial root node, representing
    * a workflow in Cylc.
    *
-   * @param {?WorkflowNode} workflow
+   * @param {?WorkflowNode} workflowNode
+   * @param {Object} lookup
    * @param {*} options
    */
-  constructor (workflow, options) {
+  constructor (workflowNode, lookup, options) {
     const defaults = {
       cyclePointsOrderDesc: CylcTree.DEFAULT_CYCLE_POINTS_ORDER_DESC
     }
+    this.lookup = lookup
     this.options = Object.assign(defaults, options)
-    this.lookup = new Map()
-    if (!workflow) {
+    if (!workflowNode) {
       this.root = {
         id: '',
         node: {},
         children: []
       }
     } else {
-      this.root = workflow
-      this.lookup.set(this.root.id, this.root)
+      this.root = workflowNode
+      Vue.set(this.lookup, this.root.id, this.root)
     }
   }
 
@@ -292,11 +293,12 @@ class CylcTree {
       throw new Error('You must provide a valid workflow!')
     }
     this.root = workflow
-    this.lookup.set(workflow.id, workflow)
+    Vue.set(this.lookup, workflow.id, workflow)
   }
 
   clear () {
     this.lookup.clear()
+    for (const key of this.lookup) Vue.delete(this.lookup, key)
     this.root = {
       id: '',
       node: {},
@@ -308,7 +310,7 @@ class CylcTree {
    * @returns {boolean}
    */
   isEmpty () {
-    return this.lookup.size === 0
+    return this.lookup.length === 0
   }
 
   /**
@@ -318,7 +320,7 @@ class CylcTree {
     const stack = [node]
     while (stack.length > 0) {
       const n = stack.pop()
-      this.lookup.delete(n.id)
+      Vue.delete(this.lookup, n.id)
       if (n.children && n.children.length > 0) {
         stack.push(...n.children)
       }
@@ -331,8 +333,8 @@ class CylcTree {
    * @param {CyclePointNode} cyclePoint
    */
   addCyclePoint (cyclePoint) {
-    if (!this.lookup.has(cyclePoint.id)) {
-      this.lookup.set(cyclePoint.id, cyclePoint)
+    if (!this.lookup[cyclePoint.id]) {
+      Vue.set(this.lookup, cyclePoint.id, cyclePoint)
       const parent = this.root
       // when DESC mode, reverse to put cyclepoints in ascending order (i.e. 1, 2, 3)
       const cyclePoints = this.options.cyclePointsOrderDesc ? [...parent.children].reverse() : parent.children
@@ -353,7 +355,7 @@ class CylcTree {
    * @param {CyclePointNode} cyclePoint
    */
   updateCyclePoint (cyclePoint) {
-    const node = this.lookup.get(cyclePoint.id)
+    const node = this.lookup[cyclePoint.id]
     if (node) {
       mergeWith(node, cyclePoint, mergeWithCustomizer)
     }
@@ -363,7 +365,7 @@ class CylcTree {
    * @param {string} cyclePointId
    */
   removeCyclePoint (cyclePointId) {
-    const node = this.lookup.get(cyclePointId)
+    const node = this.lookup[cyclePointId]
     if (node) {
       this.recursivelyRemoveNode(node)
       this.root.children.splice(this.root.children.indexOf(node), 1)
@@ -390,16 +392,16 @@ class CylcTree {
       return
     }
     // add if not in the lookup already
-    const existingFamilyProxy = this.lookup.get(familyProxy.id)
+    const existingFamilyProxy = this.lookup[familyProxy.id]
     if (!existingFamilyProxy) {
-      this.lookup.set(familyProxy.id, familyProxy)
+      Vue.set(this.lookup, familyProxy.id, familyProxy)
     } else {
       // We may get a family proxy added twice. The first time is when it is the parent of another
       // family proxy. In that case, we create an orphan node in the lookup table.
       // The second time will be node with more information, such as .firstParent {}. When this happens,
       // we must remember to merge the objects.
       mergeWith(existingFamilyProxy, familyProxy, mergeWithCustomizer)
-      this.lookup.set(existingFamilyProxy.id, existingFamilyProxy)
+      Vue.set(this.lookup, existingFamilyProxy.id, existingFamilyProxy)
       // NOTE: important, replace the version so that we use the existing one
       // when linking with the parent node in the tree, not the new GraphQL data
       familyProxy = existingFamilyProxy
@@ -418,14 +420,14 @@ class CylcTree {
       if (familyProxy.node.firstParent.name === FAMILY_ROOT) {
         // if the parent is root, we use the cyclepoint as the parent
         const cyclePointId = getCyclePointId(familyProxy)
-        parent = this.lookup.get(cyclePointId)
-      } else if (this.lookup.has(familyProxy.node.firstParent.id)) {
+        parent = this.lookup[cyclePointId]
+      } else if (this.lookup[familyProxy.node.firstParent.id]) {
         // if its parent is another family proxy node and must already exist
-        parent = this.lookup.get(familyProxy.node.firstParent.id)
+        parent = this.lookup[familyProxy.node.firstParent.id]
       } else {
         // otherwise we create it so task proxies can be added to it as a child
         parent = createFamilyProxyNode(familyProxy.node.firstParent)
-        this.lookup.set(parent.id, parent)
+        Vue.set(this.lookup, parent.id, parent)
       }
       // since this method may be called several times for the same family proxy (see comments above), it means
       // the parent-child could end up repeated by accident; it means we must make sure to create this relationship
@@ -446,7 +448,7 @@ class CylcTree {
    * @param {FamilyProxyNode} familyProxy
    */
   updateFamilyProxy (familyProxy) {
-    const node = this.lookup.get(familyProxy.id)
+    const node = this.lookup[familyProxy.id]
     if (node) {
       mergeWith(node, familyProxy, mergeWithCustomizer)
       if (!node.node.state) {
@@ -467,11 +469,11 @@ class CylcTree {
       // 0 has the owner, 1 has the workflow Id, 2 has the cycle point, and 3 the family name
       const [owner, workflowId] = familyProxyId.split('|')
       nodeId = getCyclePointId({ id: familyProxyId })
-      node = this.lookup.get(nodeId)
+      node = this.lookup[nodeId]
       parentId = `${owner}|${workflowId}`
     } else {
       nodeId = familyProxyId
-      node = this.lookup.get(nodeId)
+      node = this.lookup[nodeId]
       if (node && node.node && node.node.firstParent) {
         if (node.node.firstParent.name === FAMILY_ROOT) {
           parentId = getCyclePointId(node)
@@ -482,7 +484,7 @@ class CylcTree {
     }
     if (node) {
       this.recursivelyRemoveNode(node)
-      const parent = this.lookup.get(parentId)
+      const parent = this.lookup[parentId]
       // If the parent has already been removed from the lookup map, there won't be any parent here
       if (parent) {
         parent.children.splice(parent.children.indexOf(node), 1)
@@ -504,17 +506,17 @@ class CylcTree {
     if (taskProxy.node.firstParent.name === FAMILY_ROOT) {
       // if the parent is root, we must instead attach this node to the cyclepoint!
       const cyclePointId = getCyclePointId(taskProxy)
-      return this.lookup.get(cyclePointId)
+      return this.lookup[cyclePointId]
     }
     // otherwise its parent **MAY** already exist
-    return this.lookup.get(taskProxy.node.firstParent.id)
+    return this.lookup[taskProxy.node.firstParent.id]
   }
 
   /**
    * @param {TaskProxyNode} taskProxy
    */
   addTaskProxy (taskProxy) {
-    if (!this.lookup.has(taskProxy.id)) {
+    if (!this.lookup[taskProxy.id]) {
       // progress starts at 0
       taskProxy.node.progress = 0
       // A TaskProxy could be a ghost node, which doesn't have a state/status yet.
@@ -525,7 +527,7 @@ class CylcTree {
       if (!taskProxy.node.state) {
         taskProxy.node.state = ''
       }
-      this.lookup.set(taskProxy.id, taskProxy)
+      Vue.set(this.lookup, taskProxy.id, taskProxy)
       if (taskProxy.node.firstParent) {
         const parent = this.findTaskProxyParent(taskProxy)
         if (!parent) {
@@ -548,7 +550,7 @@ class CylcTree {
    * @param {TaskProxyNode} taskProxy
    */
   updateTaskProxy (taskProxy) {
-    const node = this.lookup.get(taskProxy.id)
+    const node = this.lookup[taskProxy.id]
     if (node) {
       mergeWith(node, taskProxy, mergeWithCustomizer)
     }
@@ -558,7 +560,7 @@ class CylcTree {
    * @param {string} taskProxyId
    */
   removeTaskProxy (taskProxyId) {
-    const taskProxy = this.lookup.get(taskProxyId)
+    const taskProxy = this.lookup[taskProxyId]
     if (taskProxy) {
       this.recursivelyRemoveNode(taskProxy)
       // Remember that we attach task proxies children of 'root' directly to a cycle point!
@@ -575,10 +577,10 @@ class CylcTree {
    * @param {JobNode} job
    */
   addJob (job) {
-    if (!this.lookup.has(job.id)) {
-      this.lookup.set(job.id, job)
+    if (!this.lookup[job.id]) {
+      Vue.set(this.lookup, job.id, job)
       if (job.node.firstParent) {
-        const parent = this.lookup.get(job.node.firstParent.id)
+        const parent = this.lookup[job.node.firstParent.id]
         const insertIndex = sortedIndexBy(
           parent.children,
           job,
@@ -592,7 +594,7 @@ class CylcTree {
    * @param {JobNode} job
    */
   updateJob (job) {
-    const node = this.lookup.get(job.id)
+    const node = this.lookup[job.id]
     if (node) {
       mergeWith(node, job, mergeWithCustomizer)
     }
@@ -602,11 +604,11 @@ class CylcTree {
    * @param {string} jobId
    */
   removeJob (jobId) {
-    const job = this.lookup.get(jobId)
+    const job = this.lookup[jobId]
     if (job) {
       this.recursivelyRemoveNode(job)
       if (job.node.firstParent) {
-        const parent = this.lookup.get(job.node.firstParent.id)
+        const parent = this.lookup[job.node.firstParent.id]
         // prevent runtime error in case the parent was already removed
         if (parent) {
           // re-calculate the job's task progress

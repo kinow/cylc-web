@@ -99,16 +99,23 @@ export default {
       JobData: {
         job: FRAGMENT_JOB_DATA
       }
-    },
+    }
+  }),
+  computed: {
     /**
      * This is the CylcTree, which contains the hierarchical tree data structure.
      * It is created from the GraphQL data, with the only difference that this one
      * contains hierarchy, while the GraphQL is flat-ish.
      * @type {null|CylcTree}
      */
-    tree: new CylcTree(null, {
-      cyclePointsOrderDesc: localStorage.cyclePointsOrderDesc ? JSON.parse(localStorage.cyclePointsOrderDesc) : CylcTree.DEFAULT_CYCLE_POINTS_ORDER_DESC
-    })
-  })
+    tree () {
+      const workflowNode = null
+      const workflow = this.workflow
+      const options = {
+        cyclePointsOrderDesc: localStorage.cyclePointsOrderDesc ? JSON.parse(localStorage.cyclePointsOrderDesc) : CylcTree.DEFAULT_CYCLE_POINTS_ORDER_DESC
+      }
+      return new CylcTree(workflowNode, workflow, options)
+    }
+  }
 }
 </script>
