@@ -209,16 +209,6 @@ export default {
     Tree,
     WorkflowIcon
   },
-  props: {
-    /**
-     * Vanilla workflows object from GraphQL query
-     * @type {{}|null}
-     */
-    workflows: {
-      type: Array,
-      required: true
-    }
-  },
   mixins: [
     subscriptionComponentMixin
   ],
