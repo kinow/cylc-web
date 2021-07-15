@@ -23,6 +23,14 @@
  */
 
 /**
+ * @typedef {Object} WorkflowNamePartGScanNode
+ * @property {String} id
+ * @property {String} type
+ * @property {WorkflowGraphQLData} node
+ * @property {Array<WorkflowNamePartGScanNode>} children
+ */
+
+/**
  * Create a new Workflow Node.
  *
  * @private
@@ -66,7 +74,7 @@ function newWorkflowPartNode (id, part) {
  *
  * @param {WorkflowGraphQLData} workflow
  * @param {boolean} hierarchy - whether to parse the Workflow name and create a hierarchy or not
- * @returns {{node, id, type: string}|null}
+ * @returns {WorkflowGScanNode|WorkflowNamePartGScanNode|null}
  */
 function createWorkflowNode (workflow, hierarchy) {
   if (!hierarchy) {
